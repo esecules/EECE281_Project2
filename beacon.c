@@ -1,0 +1,1 @@
+//The code for the beacon goes here.
