@@ -15,14 +15,33 @@
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
 //Motor Pins
-#define LWHEEL_R P0_0
-#define LWHEEL_B P0_1
-#define RWHEEL_R P0_2
-#define RWHEEL_B P0_3
-#define SENSE_LEFT 0
+#define LWHEEL_R	P0_0
+#define LWHEEL_B	P0_1
+#define RWHEEL_R	P0_2
+#define RWHEEL_B	P0_3
+#define SENSE_LEFT 	0
 #define SENSE_RIGHT 1
-#define FORWARD 1
-#define BACK 0
+#define FORWARD 	1
+#define BACK 		0
+
+//Commands
+#define NONE			0	
+#define PARK			1
+#define ROT180			2
+#define AWAY			3
+#define CLOSER			4
+#define CRANE_UP		5
+#define CRANE_DOWN		6
+#define MOVE_LEFT		7
+#define MOVE_RIGHT		8
+#define MOVE_BACK		9
+#define MOVE_FORWARD	10
+#define MANUAL_DRIVE	11
+//Increment for distance
+#define STEP 			20
+#define MAX_DISTANCE	200
+#define MIN_DISTANCE	10
+
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -32,7 +51,7 @@ volatile unsigned int rDirection=0;
 volatile unsigned char lWheel = 0;
 volatile unsigned char rWheel = 0;
 int distance = 0;
-char park = 0;
+int command = 0;
 int sensativity = 0;
 
 unsigned char _c51_external_startup(void) 
@@ -76,24 +95,24 @@ void pwmcounter (void) interrupt 1
 	
 	if(lWheel){
 		if(lDirection==FORWARD){
-			P1_0=(pwmL>pwmcount)?0:1;
-			P1_1=1;
+			LWHEEL_R=(pwmL>pwmcount)?0:1;
+			LWHEEL_B=1;
 		}
 	
 		if(lDirection==BACK){
-			P1_1=(pwmL>pwmcount)?0:1;
-			P1_0=1;
+			LWHEEL_B=(pwmL>pwmcount)?0:1;
+			LWHEEL_R=1;
 		}
 	}
 	if(rWheel){
 		if(rDirection==FORWARD){
-			P1_0=(pwmR>pwmcount)?0:1;
-			P1_1=1;
+			RWHEEL_R=(pwmR>pwmcount)?0:1;
+			RWHEEL_B=1;
 		}
 	
 		if(rDirection==BACK){
-			P1_1=(pwmR>pwmcount)?0:1;
-			P1_0=1;
+			RWHEEL_B=(pwmR>pwmcount)?0:1;
+			RWHEEL_R=1;
 		}
 	}
 }
@@ -103,47 +122,117 @@ int getAmplitude(char channel){
 	return channel;
 }
 
-void getCommand(void){
-	
-	park = 0;
+int getCommand(void){
+	return NONE;
 }
 
 void doPark(void){
-
-	park = 0;
+	
 }
 
-void main(void){
+void doRot180(void){
+
+}
+
+void moveCrane(char direction){
 	
+}
+void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
+	int command = NONE;
 	while(1){
 		rAmp = getAmplitude(SENSE_RIGHT);
 		lAmp = getAmplitude(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
-			getCommand();
-			if(park) doPark();
+			command = getCommand();
+			
+			switch(command){
+				case PARK:
+					doPark();
+					break;
+				case ROT180:
+					doRot180();
+					break;
+				case CRANE_UP:
+					moveCrane(CRANE_UP);
+					break;
+				case CRANE_DOWN:
+					moveCrane(CRANE_DOWN);
+					break;
+				case MANUAL_DRIVE:
+					return;
+				case MOVE_LEFT:
+					break;
+				case MOVE_RIGHT:
+					break;
+				case MOVE_BACK:
+					break;
+				case MOVE_FORWARD:
+					break;
+			}
+			command = NONE;
 		}
-		
-		if(rAmp < distance + sensativity){
-			rDirection = FORWARD;
-			rWheel = 1;	
+	}
+}
+void main(void){
+	
+	int rAmp = 0;
+	int lAmp = 0;
+	int command = NONE;
+	while(1){
+		rAmp = getAmplitude(SENSE_RIGHT);
+		lAmp = getAmplitude(SENSE_LEFT);	
+		if(rAmp == 0 && lAmp ==0){
+			command = getCommand();
+			
+			switch(command){
+				case PARK:
+					doPark();
+					break;
+				case ROT180:
+					doRot180();
+					break;
+				case CLOSER:
+					distance -= STEP;
+					if(distance < 0) distance = 0;
+					break;
+				case AWAY:
+					distance += STEP;
+					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
+					break;
+				case CRANE_UP:
+					moveCrane(CRANE_UP);
+					break;
+				case CRANE_DOWN:
+					moveCrane(CRANE_DOWN);
+					break;
+				case MANUAL_DRIVE:
+					doManualDrive();
+					break;			
+			}
+			command = NONE;
 		}
-		else if(rAmp > distance - sensativity){
-			rDirection = BACK;
-			rWheel = 1;	
-		}
-		else rWheel = 0;
-		
-		if(lAmp < distance + sensativity){
-			lDirection = FORWARD;
-			lWheel = 1;	
-		}
-		else if(lAmp > distance - sensativity){
-			lDirection = BACK;
-			lWheel = 1;	
-		}
-		else lWheel = 0;
-				
+		else{
+			if(rAmp < distance + sensativity){
+				rDirection = FORWARD;
+				rWheel = 1;	
+			}
+			else if(rAmp > distance - sensativity){
+				rDirection = BACK;
+				rWheel = 1;	
+			}
+			else rWheel = 0;
+			
+			if(lAmp < distance + sensativity){
+				lDirection = FORWARD;
+				lWheel = 1;	
+			}
+			else if(lAmp > distance - sensativity){
+				lDirection = BACK;
+				lWheel = 1;	
+			}
+			else lWheel = 0;
+		}	
 	}
 }
