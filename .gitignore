@@ -16,3 +16,11 @@
 *.exe
 *.out
 *.app
+
+# C
+*.hex
+*.lkr
+*.lst
+*.map
+*.obj
+*.asm
