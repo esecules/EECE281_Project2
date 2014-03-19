@@ -45,7 +45,7 @@ unsigned char _c51_external_startup(void)
 	TR0=1; // Start timer 0 (bit 4 in TCON)
 	ET0=1; // Enable timer 0 interrupt
 	EA=1;  // Enable global interrupts
-	   
+	
     return 0;
 }
 
