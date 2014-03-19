@@ -41,7 +41,8 @@
 #define STEP 			20
 #define MAX_DISTANCE	200
 #define MIN_DISTANCE	10
-
+//Car Dimensions (in centimeters)
+#define WHEEL_CIRCUMFERENCE	21
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -127,7 +128,10 @@ int getCommand(void){
 }
 
 void doPark(void){
-	
+
+	doRot45CounterClockwise();
+	moveDistance(26.0);
+	doRot45Clockwise();
 }
 
 void doRot180(void){
@@ -136,6 +140,19 @@ void doRot180(void){
 
 void moveCrane(char direction){
 	
+}
+
+void doRot45CounterClockwise(void) {
+
+}
+
+void doRot45Clockwise(void){
+
+}
+
+//distance must be in centimeters
+void moveDistance ( double distance ) {
+
 }
 void doManualDrive(){
 	int rAmp = 0;
