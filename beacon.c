@@ -1,5 +1,4 @@
-//The code for the beacon goes here.
-
+ //The code for the beacon goes here.
 #include <stdio.h>
 #include <at89lp51rd2.h>
 
@@ -13,7 +12,24 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
-//These variables are used in the ISR
+//PSX Controller Buttons
+#define UP		00000001B
+#define DOWN	00000010B
+#define LEFT	00000011B
+#define RIGHT	00000100B
+#define UPRIGHT	00000101B
+#define UPLEFT	00000110B
+#define DOWNRIGHT 00000111B
+#define DOWNLEFT  00001000B
+#define R1	00001001B
+#define R2	00001010B
+#define X	00001011B
+#define TRIANGLE 00001100B
+#define SQUARE	 00001101B
+#define CIRCLE	 00001110B
+#define START	 00001111B
+#define SELECT	 00010000B
+
 
 
 unsigned char _c51_external_startup(void)
@@ -49,7 +65,37 @@ unsigned char _c51_external_startup(void)
     return 0;
 }
 
-/*
+//Utilities file for functions like wait
+void wait_bit_time (void)
+{
+	_asm
+	;For a 22.1184MHz crystal one machine cycle 
+	;takes 12/22.1184MHz=0.5425347us
+	mov R2, #2
+	N3: mov R1, #250
+	N2: mov R0, #184
+	N1: djnz R0, N1 ; 2 machine cycles-> 2*0.5425347us*184=200us
+	djnz R1, N2 ; 200us*250=0.05s
+	djnz R2, N3 ; 0.05s*20=1s
+	ret
+	_endasm;
+}
+void wait_one_and_half_bit_time (void)
+{
+	_asm
+	;For a 22.1184MHz crystal one machine cycle 
+	;takes 12/22.1184MHz=0.5425347us
+	mov R2, #3
+	M3: mov R1, #250
+	M2: mov R0, #184
+	M1: djnz R0, N1 ; 2 machine cycles-> 2*0.5425347us*184=200us
+	djnz R1, N2 ; 200us*250=0.05s
+	djnz R2, N3 ; 0.05s*20=1s
+	ret
+	_endasm;
+}
+
+//Write
 void tx_byte ( unsigned char val )
 {
 	unsigned char j;
@@ -67,7 +113,24 @@ void tx_byte ( unsigned char val )
 	wait_bit_time();
 }
 
-*/
+//Read
+unsigned char rx_byte ( int min ) 
+{ 
+	unsigned char j, val; 
+	int v;
+	//Skip the start bit 
+	val=0; 
+	wait_one_and_half_bit_time(); 
+	for(j=0; j<8; j++) 
+	{
+		v=GetADC(P1_7); 
+		val|=(v>min)?(0x01<<j):0x00; 
+		wait_bit_time(); 
+	} //Wait for stop bits 
+	wait_one_and_half_bit_time(); 
+	return val;
+}
+
 
 void wait5ms (void)
 {
@@ -112,17 +175,75 @@ unsigned int GetADC(unsigned char channel)
 	return adc;
 }
 
-void main(void){
+void main(void)
+{	
+	unsigned char command;
 	
-	
-	while(1) {
-	
-	
-		if(P1_7=1)  {
-		P1_6=1;
+	while(1) 
+	{
+		if(P1_5=1) 
+		{
+			command = rx_byte(2.5)); //find minimum noise value with oscilloscope		
 		}
-		else {
-		P1_6=0;
+		if(command == UP)
+		{
+			printf("UP");
+		}
+		else if(command == DOWN)
+		{
+			printf("DOWN");
+		}
+		else if(command == LEFT)
+		{
+			printf("LEFT");
+		}
+		else if(command == RIGHT)
+		{
+			printf("RIGHT");
+		}
+		else if(command == UPLEFT)
+		{
+			printf("UP LEFT");
+		}
+		else if(command == UPRIGHT)
+		{
+			printf("UP RIGHT");
+		}
+		else if(command == DOWNLEFT)
+		{
+			printf("DOWN LEFT");
+		}
+		else if(command == SELECT)
+		{
+			printf("Select Pressed - Change Modes");
+		}
+		else if(command == START)
+		{
+			printf("START");
+		}
+		else if(command == X)
+		{
+			printf("X");
+		}
+		else if(command == TRIANGLE)
+		{
+			printf("TRIANGLE");
+		}
+		else if(command == SQUARE)
+		{
+			printf("SQUARE");
+		}
+		else if(command == CIRCLE)
+		{
+			printf("CIRCLE");
+		}
+		else if(command == R1)
+		{
+			printf("R1");
+		}
+		else if(command == R2)
+		{
+			printf("R2");
 		}
 	}
 }
