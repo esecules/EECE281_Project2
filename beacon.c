@@ -13,6 +13,9 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
+//These variables are used in the ISR
+volatile unsigned char 
+
 unsigned char _c51_external_startup(void)
 {
 	// Configure ports as a bidirectional with internal pull-ups.
