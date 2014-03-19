@@ -17,9 +17,15 @@ const int psxDelay = 50;         // determine the clock delay in microseconds
 
 unsigned int data = 0;           // data stores the controller response
 
+
+
 void setup()
 {
   // initialize the Psx library
+  pinMode(11, OUTPUT);
+  digitalWrite(11, LOW);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
   Psx.setupPins(dataPin, cmndPin, attPin, clockPin, psxDelay);
   Serial.begin(9600); // results will be displayed on the Serial Monitor
 }
@@ -36,8 +42,17 @@ void loop()
     Serial.println("down button");
   if(data & 4)
     Serial.println("right button");
-  if(data & 8)
+    
+  if(data & 8) {
     Serial.println("up button");
+    digitalWrite(11, HIGH);
+    digitalWrite(13, HIGH);
+  }
+  else {
+    digitalWrite(11, LOW);
+    digitalWrite(13, LOW);
+  }
+  
   if(data & 16)
     Serial.println("start button");
   if(data & 128)

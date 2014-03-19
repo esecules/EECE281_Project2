@@ -14,7 +14,7 @@
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
 //These variables are used in the ISR
-volatile unsigned char 
+
 
 unsigned char _c51_external_startup(void)
 {
@@ -49,6 +49,7 @@ unsigned char _c51_external_startup(void)
     return 0;
 }
 
+/*
 void tx_byte ( unsigned char val )
 {
 	unsigned char j;
@@ -65,6 +66,8 @@ void tx_byte ( unsigned char val )
 	wait_bit_time();
 	wait_bit_time();
 }
+
+*/
 
 void wait5ms (void)
 {
@@ -110,5 +113,16 @@ unsigned int GetADC(unsigned char channel)
 }
 
 void main(void){
-
+	
+	
+	while(1) {
+	
+	
+		if(P1_7=1)  {
+		P1_6=1;
+		}
+		else {
+		P1_6=0;
+		}
+	}
 }
