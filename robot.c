@@ -127,13 +127,6 @@ int getCommand(void){
 	return NONE;
 }
 
-void doPark(void){
-
-	doRot45CounterClockwise();
-	moveDistance(26.0);
-	doRot45Clockwise();
-}
-
 void doRot180(void){
 
 }
@@ -151,8 +144,15 @@ void doRot45Clockwise(void){
 }
 
 //distance must be in centimeters
-void moveDistance ( double distance ) {
+void moveDistance (double distance) {
+}
 
+
+void doPark(void){
+
+	doRot45CounterClockwise();
+	moveDistance(26.0);
+	doRot45Clockwise();
 }
 void doManualDrive(){
 	int rAmp = 0;
