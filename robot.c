@@ -47,7 +47,7 @@
 #define MAX_DISTANCE	200
 #define MIN_DISTANCE	10
 //Car Dimensions (in centimeters)
-#define WHEEL_CIRCUMFERENCE	21
+#define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			0.96
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
@@ -165,7 +165,7 @@ void moveCrane(char direction){
 }
 
 void rotate(char direction, int angle){
-	timercount = 0;
+	timer = 0;
 	switch (direction){
 		case CLOCK:
 			rDirection = BACK;
@@ -184,14 +184,19 @@ void rotate(char direction, int angle){
 			lWheel = 1;
 			break;
 		}
-	while(timercount < (angle/360)*SEC_ROT*10)
+	while(timer < (angle/360)*SEC_ROT*10)
 }
 
 //distance must be in centimeters
 void moveDistance (double distance, char direction) {
-	timercount = 0;
-	
-	while(timercount < 
+	rDirection = direction;
+	lDirection = direction;
+	pwmL = 100;
+	pwmR = 100;
+	timer = 0;
+	rWheel = 1;
+	lWheel = 1;
+	while(timer< (10.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT)
 }
 
 
@@ -334,11 +339,11 @@ void main(void){
 				case ROT180:
 					doRot180();
 					break;
-				case CLOSER:
+				case MOVE_FORWARD:
 					distance -= STEP;
 					if(distance < 0) distance = 0;
 					break;
-				case AWAY:
+				case MOVE_BACK:
 					distance += STEP;
 					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
 					break;
