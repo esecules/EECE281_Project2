@@ -17,7 +17,8 @@ const int psxDelay = 50;         // determine the clock delay in microseconds
 const int handshake = 13;
 const int tx = 9;
 const int rx = 10;
-unsigned int data = 0;           // data stores the controller response
+unsigned int data = 0; // data stores the controller response
+
 
 const unsigned char  UP	= 1;  
 const unsigned char  DOWN =2; 
@@ -49,27 +50,27 @@ void setup()
 void bitbanging (unsigned char psxbutton) {
 
   int j;
+  unsigned char txon;
 
-digitalWrite( handshake, HIGH);
 digitalWrite( tx, LOW);
 delay(50);
 
 for (j=0; j<8; j++)
 {
- if(psxbutton&(0x01<<j))
-   digitalWrite( tx, LOW);
- else  
+ txon=psxbutton&(0x01<<j)?1:0;
+  if(txon==1) {
    digitalWrite( tx, HIGH);
+ }
+ else  {
+   digitalWrite( tx, LOW);
+ }
 delay(50);
 }
 
 digitalWrite( tx, HIGH);
 //Send the stop bits
 delay(50);
-delay(50);
-
-digitalWrite( handshake, LOW);
-  
+delay(50);  
 }
 
 
