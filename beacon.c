@@ -57,29 +57,6 @@ void wait_one_and_half_bit_time (void)
 	_endasm;
 }
 
-//Write
-/*
-
-void tx_byte ( unsigned char val )
-{
-	unsigned char j;
-	//Send the start bit
-	txon=0;
-	wait_bit_time();
-	for (j=0; j<8; j++)
-	{
-		txon=val&(0x01<<j)?1:0;
-		wait_bit_time();
-	}
-	txon=1;
-	//Send the stop bits
-	wait_bit_time();
-	wait_bit_time();
-}
-
-*/
-
-
 
 //Read
 unsigned char rx_byte () 
@@ -112,6 +89,26 @@ unsigned char rx_byte ()
 
 void main (void)
 {
+<<<<<<< HEAD
+unsigned char  NONE	= 0;
+unsigned char  UP	= 2;  
+unsigned char  DOWN = 4; 
+unsigned char  LEFT = 6; 
+unsigned char  RIGHT = 8; 
+unsigned char  UPRIGHT =10; 
+unsigned char  UPLEFT = 12; 
+unsigned char  DOWNRIGHT = 14; 
+unsigned char  DOWNLEFT  = 16; 
+unsigned char  R1	= 18; 
+unsigned char  R2	= 20; 
+unsigned char  X	= 22; 
+unsigned char  TRIANGLE = 24; 
+unsigned char  SQUARE = 26; 
+unsigned char  CIRCLE = 28; 
+unsigned char  START = 30; 
+unsigned char  SELECT = 32;
+unsigned char command= 0;
+=======
 	unsigned char  UP 	= 1;  
 	unsigned char  DOWN = 2; 
 	unsigned char  LEFT = 3; 
@@ -129,87 +126,109 @@ void main (void)
 	unsigned char  START  = 15; 
 	unsigned char  SELECT = 16;
 	unsigned char command = 0;
+>>>>>>> 007a30ae83bf567cd3c8285e3d120ed5e5c8cc8f
 
 	
 	while(1){
-	
 		while(P1_7==1){ //wait for signal to be zero 
 			command = rx_byte(); 
+			printf("%u", (unsigned) command);
 		}
 		
-		if(command == UP)
+		
+		
+		 if(command == DOWNRIGHT)
 		{
-			printf("UP");
+			printf("DOWNRIGHT\r\n");
+			command=0;
+		}
+			else if(command == DOWNLEFT)
+		{
+			printf("DOWNLEFT\r\n");
+			command=0;
+		}
+			else if(command == UPRIGHT)
+		{
+			printf("UPRIGHT\r\n");
+			command=0;
+		}
+			else if(command == UPLEFT)
+		{
+			printf("UPLEFT\r\n");
+			command=0;
+		}
+		
+		
+		else if(command == UP)
+		{	
+			printf("UP\r\n");
 			command=0;
 		}
 		else if(command == DOWN)
 		{
-			printf("DOWN");
+			printf("DOWN\r\n");
 			command=0;
 		}
 		else if(command == LEFT)
 		{
-			printf("LEFT");
+			printf("LEFT\r\n");
 			command=0;
 		}
 		else if(command == RIGHT)
 		{
-			printf("RIGHT");
+			printf("RIGHT\r\n");
 			command=0;
 		}
-		else if(command == UPLEFT)
-		{
-			printf("UP LEFT");
-			command=0;
-		}
-		else if(command == UPRIGHT)
-		{
-			printf("UP RIGHT");
-			command=0;
-		}
-		else if(command == DOWNLEFT)
-		{
-			printf("DOWN LEFT");
-			command=0;
-		}
+		
+		
+		
 		else if(command == SELECT)
 		{
-			printf("Select Pressed - Change Modes");
+			printf("Select Pressed - Change Modes\r\n");
 			command=0;
 		}
 		else if(command == START)
 		{
-			printf("START");
+			printf("START\r\n");
 			command=0;
 		}
+		
+		
+		
 		else if(command == X)
 		{
-			printf("X");
+			printf("X\r\n");
 			command=0;
 		}
 		else if(command == TRIANGLE)
 		{
-			printf("TRIANGLE");
+			printf("TRIANGLE\r\n");
 			command=0;
 		}
 		else if(command == SQUARE)
 		{
-			printf("SQUARE");
+			printf("SQUARE\r\n");
 			command=0;
 		}
 		else if(command == CIRCLE)
 		{
-			printf("CIRCLE");
+			printf("CIRCLE\r\n");
 			command=0;
 		}
+		
+		
 		else if(command == R1)
 		{
-			printf("R1");
+			printf("R1\r\n");
 			command=0;
 		}
 		else if(command == R2)
 		{
-			printf("R2");
+			printf("R2\r\n");
+			command=0;
+		}
+		else
+		{
 			command=0;
 		}
 	}

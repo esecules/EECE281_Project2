@@ -9,6 +9,7 @@
 #include <Psx.h>                       // Includes the Psx Library
 
 Psx Psx;                               // Create an instance of the Psx library
+
 const int dataPin  = 2;
 const int cmndPin  = 3;
 const int attPin   = 5;
@@ -19,23 +20,42 @@ const int tx = 9;
 const int rx = 10;
 unsigned int data = 0; // data stores the controller response
 
+const unsigned int  iNONE= 0; 
+const unsigned int  iUP	= 8;  
+const unsigned int  iDOWN =2; 
+const unsigned int  iLEFT =1; 
+const unsigned int  iRIGHT =4; 
+const unsigned int  iURIGHT =12; 
+const unsigned int  iULEFT =9; 
+const unsigned int  iDRIGHT =6; 
+const unsigned int  iDLEFT  =3; 
+const unsigned int  iR1	= 45056; 
+const unsigned int  iR2	= 16384; 
+const unsigned int  iX	= 512; 
+const unsigned int  iTRIANGLE = 2048; 
+const unsigned int  iSQUARE = 256; 
+const unsigned int  iCIRCLE = 1024;
+const unsigned int  iSTART = 16; 
+const unsigned int  iSELECT = 128;
 
-const unsigned char  UP	= 1;  
-const unsigned char  DOWN =2; 
-const unsigned char  LEFT =3; 
-const unsigned char  RIGHT =4; 
-const unsigned char  UPRIGHT =5; 
-const unsigned char  UPLEFt =6; 
-const unsigned char  DOWNRIGHT =7; 
-const unsigned char  DOWNLEFT  =8; 
-const unsigned char  R1	= 9; 
-const unsigned char  R2	= 10; 
-const unsigned char  X	= 11; 
-const unsigned char  TRIANGLE = 12; 
-const unsigned char  SQUARE = 13; 
-const unsigned char  CIRCLE = 14; 
-const unsigned char  START = 15; 
-const unsigned char  SELECT = 16;
+
+const unsigned char  NONE= 0; 
+const unsigned char  UP	= 2;  
+const unsigned char  DOWN =4; 
+const unsigned char  LEFT =6; 
+const unsigned char  RIGHT =8; 
+const unsigned char  URIGHT =10; 
+const unsigned char  ULEFT =12; 
+const unsigned char  DRIGHT =14; 
+const unsigned char  DLEFT  =16; 
+const unsigned char  R1	= 18; 
+const unsigned char  R2	= 20; 
+const unsigned char  X	= 22; 
+const unsigned char  TRIANGLE = 24; 
+const unsigned char  SQUARE = 26; 
+const unsigned char  CIRCLE = 28; 
+const unsigned char  START = 30; 
+const unsigned char  SELECT = 32;
 
 
 void setup()
@@ -47,8 +67,8 @@ void setup()
   Serial.begin(9600); // results will be displayed on the Serial Monitor
 }
 
-void bitbanging (unsigned char psxbutton) {
 
+void bitbanging (unsigned char psxbutton) {
   int j;
   unsigned char txon;
 
@@ -61,7 +81,8 @@ for (j=0; j<8; j++)
   if(txon==1) {
    digitalWrite( tx, HIGH);
  }
- else  {
+ else
+   {
    digitalWrite( tx, LOW);
  }
 delay(50);
@@ -69,75 +90,128 @@ delay(50);
 
 digitalWrite( tx, LOW);
 //Send the stop bits
-delay(50);
-delay(50);  
+delay(100);
+  
 }
 
 
 void loop()
 {
   data = Psx.read();        // get the psx controller button data
-  Serial.println(data);
   // check the button bits to see if a button is pressed
-  if(data & 1) { //leftbutton
-    Serial.println(3);
-    bitbanging(LEFT);
+    
+ 
+    if(data & iLEFT ) { //leftbutton
+    Serial.println(data);
+       if(data & iUP) {
+      bitbanging(ULEFT);
+      data=0;
+       }
+      else if (data & iDOWN){
+      bitbanging(DLEFT);
+       data=0;
+      }
+      else{
+      bitbanging(LEFT);
+       data=0;
+      }
   }
   
-  if(data & 2) {//down button
-    Serial.println(2);
-    bitbanging(DOWN);
-  }
-  
-  if(data & 4) { //"right button"
-    Serial.println(4);
-      bitbanging(RIGHT);
+  if(data & iRIGHT) { //"right button"
+  Serial.println(data);
+    if(data & iUP) {
+      bitbanging(URIGHT);
+       data=0;
+       }
+      else if (data & iDOWN){
+      bitbanging(DRIGHT);
+       data=0;
+      }
+      else {
+  bitbanging(RIGHT);
+   data=0;
+      }
   }  
   
-  if(data & 8) {//up button
-    Serial.println(1);
-       bitbanging(UP);
-  } 
   
-  if(data & 16) {//start button
-    Serial.println(15);
+   if(data & iDOWN) { //down button
+   Serial.println(data);
+    if(data & iRIGHT) {
+      bitbanging(DRIGHT);
+       data=0;
+       }
+      else if (data & iLEFT){
+      bitbanging(DLEFT);
+       data=0;
+      }
+      else {
+   bitbanging(DOWN);
+    data=0;
+    }
+   }
+   
+  
+   if(data & iUP) {//up button
+  Serial.println(data);
+  if(data & iRIGHT) {
+      bitbanging(URIGHT);
+       data=0;
+       }
+      else if (data & iLEFT){
+      bitbanging(ULEFT);
+       data=0;
+      }
+      else {
+       bitbanging(UP);
+        data=0;
+    } 
+   }
+
+
+
+
+
+ 
+   
+   if(data & iSTART) {//start button
+  Serial.println(data);
        bitbanging(START);
   } 
   
-  if(data & 128) {//select button
-    Serial.println(16);
+  if(data & iSELECT) {//select button
+  Serial.println(data);
       bitbanging(SELECT);
   }
   
-  if(data & 2048) {//triangle button
-    Serial.println(12);
+  if(data & iTRIANGLE) {//triangle button
+  Serial.println(data);
         bitbanging(TRIANGLE);
   }
   
-  if(data & 512) {//x button
-    Serial.println(11);
+   if(data & iX) {//x button
+  Serial.println(data);
        bitbanging(X);
   } 
   
-  if(data & 1024){//circle button
-    Serial.println(14);
+  if(data & iCIRCLE){//circle button
+  Serial.println(data);
        bitbanging(CIRCLE);
   } 
   
-  if(data & 256) {//square button
-    Serial.println(13);
-        bitbanging(SQUARE);
-  }
-  
-   if(data & 45056) {//r1 button
-    Serial.println(9);
+    if(data & iR1) {//r1 button
+   Serial.println(data);
        bitbanging(R1);
   } 
   
-   if(data & 16384) {//r2 button
-    Serial.println(10);
+   if(data & iSQUARE) {//square button
+  Serial.println(data);
+       bitbanging(SQUARE);
+  }
+  
+   if(data & iR2) {//r2 button
+   Serial.println(data);
     bitbanging(R2);
   }
   
-  delay(100);
+  delay(10);
 }
