@@ -93,10 +93,10 @@ unsigned char rx_byte ()
 	for(j=0; j<8; j++) 
 	{
 		if(P1_7==1) {
-		val|=(0x01<<j);
-		 }
+			val|=(0x01<<j);
+		}
 		else if (P1_7==0) {
-		val|=0x00;
+			val|=0x00;
 		}
 		
 		
@@ -112,23 +112,23 @@ unsigned char rx_byte ()
 
 void main (void)
 {
-unsigned char  UP	= 1;  
-unsigned char  DOWN =2; 
-unsigned char  LEFT =3; 
-unsigned char  RIGHT =4; 
-unsigned char  UPRIGHT =5; 
-unsigned char  UPLEFT =6; 
-unsigned char  DOWNRIGHT =7; 
-unsigned char  DOWNLEFT  =8; 
-unsigned char  R1	=9; 
-unsigned char  R2	=10; 
-unsigned char  X	=11; 
-unsigned char  TRIANGLE =12; 
-unsigned char  SQUARE =13; 
-unsigned char  CIRCLE =14; 
-unsigned char  START =15; 
-unsigned char  SELECT =16;
-unsigned char command=0;
+	unsigned char  UP 	= 1;  
+	unsigned char  DOWN = 2; 
+	unsigned char  LEFT = 3; 
+	unsigned char  RIGHT = 4; 
+	unsigned char  UPRIGHT 	= 5; 
+	unsigned char  UPLEFT	= 6; 
+	unsigned char  DOWNRIGHT = 7; 
+	unsigned char  DOWNLEFT  = 8; 
+	unsigned char  R1 = 9; 
+	unsigned char  R2 = 10; 
+	unsigned char  X  = 11; 
+	unsigned char  TRIANGLE = 12; 
+	unsigned char  SQUARE = 13; 
+	unsigned char  CIRCLE = 14; 
+	unsigned char  START  = 15; 
+	unsigned char  SELECT = 16;
+	unsigned char command = 0;
 
 	
 	while(1){
