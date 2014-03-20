@@ -28,14 +28,14 @@ const unsigned char  UPRIGHT =5;
 const unsigned char  UPLEFt =6; 
 const unsigned char  DOWNRIGHT =7; 
 const unsigned char  DOWNLEFT  =8; 
-const unsigned char  R1	=9; 
-const unsigned char  R2	=10; 
-const unsigned char  X	=11; 
-const unsigned char  TRIANGLE =12; 
-const unsigned char  SQUARE =13; 
-const unsigned char  CIRCLE =14; 
-const unsigned char  START =15; 
-const unsigned char  SELECT =16;
+const unsigned char  R1	= 9; 
+const unsigned char  R2	= 10; 
+const unsigned char  X	= 11; 
+const unsigned char  TRIANGLE = 12; 
+const unsigned char  SQUARE = 13; 
+const unsigned char  CIRCLE = 14; 
+const unsigned char  START = 15; 
+const unsigned char  SELECT = 16;
 
 
 void setup()
@@ -52,7 +52,7 @@ void bitbanging (unsigned char psxbutton) {
   int j;
   unsigned char txon;
 
-digitalWrite( tx, LOW);
+digitalWrite( tx, HIGH);
 delay(50);
 
 for (j=0; j<8; j++)
@@ -67,7 +67,7 @@ for (j=0; j<8; j++)
 delay(50);
 }
 
-digitalWrite( tx, HIGH);
+digitalWrite( tx, LOW);
 //Send the stop bits
 delay(50);
 delay(50);  
@@ -77,7 +77,7 @@ delay(50);
 void loop()
 {
   data = Psx.read();        // get the psx controller button data
-
+  Serial.println(data);
   // check the button bits to see if a button is pressed
   if(data & 1) { //leftbutton
     Serial.println(3);
@@ -106,12 +106,12 @@ void loop()
   
   if(data & 128) {//select button
     Serial.println(16);
-      bitbanging(DOWN);
+      bitbanging(SELECT);
   }
   
   if(data & 2048) {//triangle button
     Serial.println(12);
-        bitbanging(DOWN);
+        bitbanging(TRIANGLE);
   }
   
   if(data & 512) {//x button

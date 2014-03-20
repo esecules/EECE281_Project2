@@ -26,11 +26,11 @@ void wait_bit_time (void)
 	_asm
 	;For a 22.1184MHz crystal one machine cycle 
 	;takes 12/22.1184MHz=0.5425347us
-	N2:
+	
 	 mov R1, #250
-	N1:
+	N2:
 	 mov R0, #184
-	 
+	N1:
 	djnz R0, N1 ; //2 machine cycles-> 2*0.5425347us*184=200us
 	djnz R1, N2 ; //200us*250=0.05s
 
@@ -42,13 +42,13 @@ void wait_one_and_half_bit_time (void)
 	_asm
 	;For a 22.1184MHz crystal one machine cycle 
 	;takes 12/22.1184MHz=0.5425347us
-	M3:
+
 	 mov R2, #3
-	M2:
+	M3:
 	 mov R1, #125
-	M1:
+	M2:
 	 mov R0, #184
-	 
+	M1: 
 	djnz R0, M1 ; 2 machine cycles-> 2*0.5425347us*184=200us
 	djnz R1, M2 ; 200us*125=0.025s
 	DJNZ R2, M3 ; 3*0.025s= 0.075s
@@ -93,14 +93,14 @@ unsigned char rx_byte ()
 	for(j=0; j<8; j++) 
 	{
 		if(P1_7==1) {
-		val&(0x01<<j);
+		val|=(0x01<<j);
 		 }
 		else if (P1_7==0) {
-		val&(0x00<<j);
+		val|=0x00;
 		}
 		
+		
 	wait_bit_time(); 
-	
 	}
 	
 	wait_one_and_half_bit_time(); 
@@ -110,94 +110,109 @@ unsigned char rx_byte ()
 
 
 
-void main(void)
-{	const unsigned char  UP	= 1;  
-	const unsigned char  DOWN =2; 
-	const unsigned char  LEFT =3; 
-	const unsigned char  RIGHT =4; 
-	const unsigned char  UPRIGHT =5; 
-	const unsigned char  UPLEFT =6; 
-	const unsigned char  DOWNRIGHT =7; 
-	const unsigned char  DOWNLEFT  =8; 
-	const unsigned char  R1	=9; 
-	const unsigned char  R2	=10; 
-	const unsigned char  X	=11; 
-	const unsigned char  TRIANGLE =12; 
-	const unsigned char  SQUARE =13; 
-	const unsigned char  CIRCLE =14; 
-	const unsigned char  START =15; 
-	const unsigned char  SELECT =16;
-	unsigned char command=0;
-	printf("hello");
+void main (void)
+{
+unsigned char  UP	= 1;  
+unsigned char  DOWN =2; 
+unsigned char  LEFT =3; 
+unsigned char  RIGHT =4; 
+unsigned char  UPRIGHT =5; 
+unsigned char  UPLEFT =6; 
+unsigned char  DOWNRIGHT =7; 
+unsigned char  DOWNLEFT  =8; 
+unsigned char  R1	=9; 
+unsigned char  R2	=10; 
+unsigned char  X	=11; 
+unsigned char  TRIANGLE =12; 
+unsigned char  SQUARE =13; 
+unsigned char  CIRCLE =14; 
+unsigned char  START =15; 
+unsigned char  SELECT =16;
+unsigned char command=0;
+
 	
-	while(1) 
-	{
-			printf("%c", command);
-			command = rx_byte(); //find minimum noise value with oscilloscope	
+	while(1){
+	
+		while(P1_7==1){ //wait for signal to be zero 
+			command = rx_byte(); 
+		}
 		
-			
 		if(command == UP)
 		{
 			printf("UP");
+			command=0;
 		}
 		else if(command == DOWN)
 		{
 			printf("DOWN");
+			command=0;
 		}
 		else if(command == LEFT)
 		{
 			printf("LEFT");
+			command=0;
 		}
 		else if(command == RIGHT)
 		{
 			printf("RIGHT");
+			command=0;
 		}
 		else if(command == UPLEFT)
 		{
 			printf("UP LEFT");
+			command=0;
 		}
 		else if(command == UPRIGHT)
 		{
 			printf("UP RIGHT");
+			command=0;
 		}
 		else if(command == DOWNLEFT)
 		{
 			printf("DOWN LEFT");
+			command=0;
 		}
 		else if(command == SELECT)
 		{
 			printf("Select Pressed - Change Modes");
+			command=0;
 		}
 		else if(command == START)
 		{
 			printf("START");
+			command=0;
 		}
 		else if(command == X)
 		{
 			printf("X");
+			command=0;
 		}
 		else if(command == TRIANGLE)
 		{
 			printf("TRIANGLE");
+			command=0;
 		}
 		else if(command == SQUARE)
 		{
 			printf("SQUARE");
+			command=0;
 		}
 		else if(command == CIRCLE)
 		{
 			printf("CIRCLE");
+			command=0;
 		}
 		else if(command == R1)
 		{
 			printf("R1");
+			command=0;
 		}
 		else if(command == R2)
 		{
 			printf("R2");
+			command=0;
 		}
-		else 
-			printf("none");
-			
 	}
+	
+
 }
