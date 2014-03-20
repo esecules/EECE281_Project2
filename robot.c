@@ -1,7 +1,7 @@
 //The main code for the car goes here
 #include <stdio.h> 
 #include <at89lp51rd2.h>
-
+#include "utilities.c"
 
 // ~C51~
 #define REF 1
@@ -23,6 +23,8 @@
 #define SENSE_RIGHT 1
 #define FORWARD 	1
 #define BACK 		0
+#define CLOCK		1
+#define C_CLOCK		0
 
 //Commands
 #define NONE			0	
@@ -36,14 +38,19 @@
 #define MOVE_RIGHT		8
 #define MOVE_BACK		9
 #define MOVE_FORWARD	10
-#define MANUAL_DRIVE	11
-#define RETRACE			12
+#define MOVE_FR			11
+#define MOVE_FL			12
+#define MOVE_BR			13
+#define MOVE_BL			14
+#define MANUAL_DRIVE	15
+#define RETRACE			16
 //Increment for distance
 #define STEP 			20
 #define MAX_DISTANCE	200
 #define MIN_DISTANCE	10
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21
+#define SEC_ROT			0.96
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -159,29 +166,48 @@ void moveCrane(char direction){
 	
 }
 
-void doRot45CounterClockwise(void) {
-
-}
-
-void doRot45Clockwise(void){
-
+void rotate(char direction, int angle){
+	timercount = 0;
+	switch (direction){
+		case CLOCK:
+			rDirection = BACK;
+			lDirection = FORWARD;
+			pwmL = 100;
+			pwmR = 100;
+			rWheel = 1;
+			lWheel = 1;
+			break;
+		case C_CLOCK:
+			rDirection = FORWARD;
+			lDirection = BACK;
+			pwmL = 100;
+			pwmR = 100;
+			rWheel = 1;
+			lWheel = 1;
+			break;
+		}
+	while(timercount < (angle/360)*SEC_ROT*10)
 }
 
 //distance must be in centimeters
-void moveDistance (double distance) {
+void moveDistance (double distance, char direction) {
+	timercount = 0;
+	
+	while(timercount < 
 }
 
 
 void doPark(void){
 
-	doRot45CounterClockwise();
-	moveDistance(26.0);
-	doRot45Clockwise();
+	rotate(C_CLOCK,45);
+	moveDistance(26.0,BACK);
+	rotate(CLOCK,45);
 }
 
 unsigned char getCommand ( int min ){
 	unsigned char j, val;
 	int v;
+	EA = 0;
 	//Skip the start bit
 	val=0;
 	wait_one_and_half_bit_time();
@@ -193,6 +219,7 @@ unsigned char getCommand ( int min ){
 	}
 	//Wait for stop bits
 	wait_one_and_half_bit_time();
+	EA = 1;
 	return val;
 }
 
@@ -221,37 +248,73 @@ void doManualDrive(){
 					break;
 				case MANUAL_DRIVE:
 					return;
-				case MOVE_LEFT:
+				case MOVE_RIGHT:
 					rDirection = BACK;
 					lDirection = FORWARD;
+					pwmL = 100;
+					pwmR = 100;
 					rWheel = 1;
 					lWheel = 1;
 					break;
-				case MOVE_RIGHT:
+				case MOVE_LEFT:
 					rDirection = FORWARD;
 					lDirection = BACK;
+					pwmL = 100;
+					pwmR = 100;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_BACK:
 					rDirection = BACK;
 					lDirection = BACK;
+					pwmL = 100;
+					pwmR = 100;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_FORWARD:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
+					pwmL = 100;
+					pwmR = 100;
 					rWheel = 1;
 					lWheel = 1;
 					break;
+				case MOVE_FR:
+					rDirection = FORWARD;
+					lDirection = FORWARD;
+					pwmL = 100;
+					pwmR = 75;
+					rWheel = 1;
+					lWheel = 1;
+				case MOVE_FL:
+					rDirection = FORWARD;
+					lDirection = FORWARD;
+					pwmL = 75;
+					pwmR = 100;
+					rWheel = 1;
+					lWheel = 1;
+				case MOVE_BR:
+					rDirection = BACK;
+					lDirection = BACK;
+					pwmL = 100;
+					pwmR = 75;
+					rWheel = 1;
+					lWheel = 1;
+				case MOVE_BL:
+					rDirection = BACK;
+					lDirection = BACK;
+					pwmL = 75;
+					pwmR = 100;
+					rWheel = 1;
+					lWheel = 1;
 				default:
 					rWheel = 0;
 					lWheel = 0;
 					break;
 			}
-			command = NONE;
 		}
+		else command = NONE;
 	}
 }
 void main(void){
@@ -290,9 +353,7 @@ void main(void){
 				case MANUAL_DRIVE:
 					doManualDrive();
 					break;
-				case RETRACE:
-					
-					break;			
+						
 			}
 			command = NONE;
 		}
