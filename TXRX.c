@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <at89lp51rd2.h>
+#include <float.h>
 
 // ~C51~ 
  
@@ -16,10 +17,10 @@
 #define DATAOUT P1_2
 
 #define RXMODE 1
-#define RXTEST 1
+#define RXTEST 0
 #define RXTESTPIN P1_7
 
-#define BITTIME 100
+#define BITTIME 300
 #define STARTBYTE 0xff
 
 volatile unsigned long int systime;
@@ -113,6 +114,36 @@ void isr0 (void) interrupt 1
 	systime++;
 }
 
+void SPIWrite(unsigned char value)
+{
+	SPSTA&=(~SPIF); // Clear the SPIF flag in SPSTA
+	SPDAT=value;
+	while((SPSTA & SPIF)!=SPIF); //Wait for transmission to end
+}
+
+// Read 10 bits from the MCP3004 ADC converter
+unsigned int GetADC(unsigned char channel)
+{
+	unsigned int adc;
+
+	// initialize the SPI port to read the MCP3004 ADC attached to it.
+	SPCON&=(~SPEN); // Disable SPI
+	SPCON=MSTR|CPOL|CPHA|SPR1|SPR0|SSDIS;
+	SPCON|=SPEN; // Enable SPI
+	
+	P1_4=0; // Activate the MCP3004 ADC.
+	SPIWrite(channel|0x18);	// Send start bit, single/diff* bit, D2, D1, and D0 bits.
+	for(adc=0; adc<10; adc++); // Wait for S/H to setup
+	SPIWrite(0x55); // Read bits 9 down to 4
+	adc=((SPDAT&0x3f)*0x100);
+	SPIWrite(0x55);// Read bits 3 down to 0
+	P1_4=1; // Deactivate the MCP3004 ADC.
+	adc+=(SPDAT&0xf0); // SPDR contains the low part of the result. 
+	adc>>=4;
+		
+	return adc;
+}
+
 void t0reset(void){
 	TL0=RL0;
 	TH0=RH0;
@@ -120,11 +151,12 @@ void t0reset(void){
 }
 
 void xmtrOn(void){
-	H1=1;
-	H2=0;
-	xOn=1;
-	DATAOUT=1;
-	
+	if(!xOn){
+		H1=1;
+		H2=0;
+		xOn=1;
+		DATAOUT=1;
+	}	
 }
 
 void xmtrOff(void){
@@ -138,7 +170,7 @@ unsigned char rcvr(void){
 	if(RXTEST){
 		return RXTESTPIN?1:0;
 	}else{
-		return 0; //WIP
+		return (GetADC(0)>20)?1:0;
 	}
 }
 
@@ -207,6 +239,8 @@ void main(void){
 	unsigned char dadata=0;
 	unsigned char i=0;
 	char code teststr[]="A QUICK BROWN FOX JUMPED OVER THE LAZY DOG\na quick brown fox jumped over the lazy dog\n`1234567890-=~!@#$%^&*()_+[]\\{}|;':\",./<>?\n";
+	
+	
 	if(RXMODE){
 		printf("RX MODE");
 		while(1){
