@@ -5,6 +5,25 @@
 #define BAUD 115200L
 #define TIMER_2_RELOAD (0x10000L-(CLK/(32L*BAUD)))
 
+#define  NONE	  0
+#define  UP	  2  
+#define  DOWN   4  
+#define  LEFT   6 
+#define  RIGHT   8 
+#define  UPRIGHT  10 
+#define  UPLEFT   12 
+#define  DOWNRIGHT   14 
+#define  DOWNLEFT    16 
+#define  R1	  18 
+#define  R2	  20  
+#define  X	  22 
+#define  TRIANGLE   24 
+#define  SQUARE   26 
+#define  CIRCLE   28 
+#define  START   30 
+#define  SELECT   32 
+#define command  0
+
 
 unsigned char _c51_external_startup(void)
 {
@@ -89,44 +108,6 @@ unsigned char rx_byte ()
 
 void main (void)
 {
-<<<<<<< HEAD
-unsigned char  NONE	= 0;
-unsigned char  UP	= 2;  
-unsigned char  DOWN = 4; 
-unsigned char  LEFT = 6; 
-unsigned char  RIGHT = 8; 
-unsigned char  UPRIGHT =10; 
-unsigned char  UPLEFT = 12; 
-unsigned char  DOWNRIGHT = 14; 
-unsigned char  DOWNLEFT  = 16; 
-unsigned char  R1	= 18; 
-unsigned char  R2	= 20; 
-unsigned char  X	= 22; 
-unsigned char  TRIANGLE = 24; 
-unsigned char  SQUARE = 26; 
-unsigned char  CIRCLE = 28; 
-unsigned char  START = 30; 
-unsigned char  SELECT = 32;
-unsigned char command= 0;
-=======
-	unsigned char  UP 	= 1;  
-	unsigned char  DOWN = 2; 
-	unsigned char  LEFT = 3; 
-	unsigned char  RIGHT = 4; 
-	unsigned char  UPRIGHT 	= 5; 
-	unsigned char  UPLEFT	= 6; 
-	unsigned char  DOWNRIGHT = 7; 
-	unsigned char  DOWNLEFT  = 8; 
-	unsigned char  R1 = 9; 
-	unsigned char  R2 = 10; 
-	unsigned char  X  = 11; 
-	unsigned char  TRIANGLE = 12; 
-	unsigned char  SQUARE = 13; 
-	unsigned char  CIRCLE = 14; 
-	unsigned char  START  = 15; 
-	unsigned char  SELECT = 16;
-	unsigned char command = 0;
->>>>>>> 007a30ae83bf567cd3c8285e3d120ed5e5c8cc8f
 
 	
 	while(1){
