@@ -15,10 +15,10 @@
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
 //Motor Pins
-#define LWHEEL_R	P0_0
-#define LWHEEL_B	P0_1
-#define RWHEEL_R	P0_2
-#define RWHEEL_B	P0_3
+#define LWHEEL_R	P1_0
+#define LWHEEL_B	P1_1
+#define RWHEEL_R	P1_2
+#define RWHEEL_B	P1_3
 #define SENSE_LEFT 	0
 #define SENSE_RIGHT 1
 #define FORWARD 	1
@@ -156,9 +156,7 @@ unsigned int getADC(unsigned char channel)
 	return adc;
 }
 
-void doRot180(void){
 
-}
 
 void moveCrane(char direction){
 	
@@ -183,8 +181,15 @@ void rotate(char direction, int angle){
 			rWheel = 1;
 			lWheel = 1;
 			break;
+		default:
+			rWheel = 0;
+			lWheel = 0;
+			break;
 		}
-	while(timer < (angle/360)*SEC_ROT*10)
+	while(timer < (angle/360)*SEC_ROT*10){}
+		rWheel = 0;
+		lWheel = 0;
+	
 }
 
 //distance must be in centimeters
@@ -196,7 +201,7 @@ void moveDistance (double distance, char direction) {
 	timer = 0;
 	rWheel = 1;
 	lWheel = 1;
-	while(timer< (10.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT)
+	while(timer< (10.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT){}
 }
 
 
@@ -225,7 +230,13 @@ unsigned char getCommand ( int min ){
 	EA = 1;
 	return val;
 }
-
+void test(void){
+	while(1){
+		moveDistance(5,FORWARD);
+		moveDistance(5,BACK);
+	}
+	
+}
 void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
@@ -241,7 +252,7 @@ void doManualDrive(){
 					doPark();
 					break;
 				case ROT180:
-					doRot180();
+					rotate(180,CLOCK);
 					break;
 				case CRANE_UP:
 					moveCrane(CRANE_UP);
@@ -326,6 +337,7 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
+	test();
 	while(1){
 		rAmp = getADC(SENSE_RIGHT);
 		lAmp = getADC(SENSE_LEFT);	
@@ -337,7 +349,7 @@ void main(void){
 					doPark();
 					break;
 				case ROT180:
-					doRot180();
+					rotate(180,CLOCK);
 					break;
 				case MOVE_FORWARD:
 					distance -= STEP;
@@ -380,7 +392,8 @@ void main(void){
 				tempL = 1;	
 			}
 			else tempL = 0;
-			
+			pwmR = 50;
+			pwmL = 50;
 			rWheel = tempR;
 			lWheel = tempL;
 		}	
