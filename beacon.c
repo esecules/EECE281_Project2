@@ -97,44 +97,41 @@ void wait_one_and_half_bit_time (void)
 
 unsigned char read4channels()
 {
-	unsigned char val, bit0, bit1, bit2, bit3;
+	unsigned char val;
 	
 	val = 0;
+
 	
-	bit0 = P1_0;
-	bit1 = P1_1;
-	bit2 = P1_2;
-	bit3 = P1_3;
-	
-	if(bit0 == 1) 
+	if(P1_0 == 1) 
 	{
 		val|=(0x01<<0);
 	}
-	else if (bit0 == 0) 
+	else if (P1_0 == 0) 
 	{
 		val|=0x00;
 	}
-	if(bit1 == 1) 
+	
+	if(P1_1 == 1) 
 	{
 		val|=(0x01<<1);
 	}
-	else if (bit1 == 0) 
+	else if (P1_1 == 0) 
 	{
 		val|=0x00;
 	}
-	if(bit2 == 1) 
+	if(P1_2 == 1) 
 	{
 		val|=(0x01<<2);
 	}
-	else if (bit2 == 0) 
+	else if (P1_2 == 0) 
 	{
 		val|=0x00;
 	}
-	if(bit3 == 1) 
+	if(P1_3 == 1) 
 	{
 		val|=(0x01<<3);
 	}
-	else if (bit3 == 0) 
+	else if (P1_3 == 0) 
 	{
 		val|=0x00;
 	}
