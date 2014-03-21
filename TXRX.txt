@@ -1,0 +1,28 @@
+About TXRX (data link protocol)
+
+1. bit encoding [xOn(), xOff(), rcvr()]
+
+The transmitter uses a simple AM scheme where on means 1 and off means 0. Timing information is not transmitted in the signal and must be defined in the protocol. Current specs are:
+
+Baud rate = 100 bit/s (incl. overhead)
+1/0 transition value = 20
+
+2. byte encoding [tByte(), rByte()]
+
+The transmitter modulates the 15khz carrier by a RS232-like signal. That means it's...
+- High when idle
+- Has one low start bit
+- Sends the data LSB first
+- Has one high stop bit
+The transmitter actually transmits 2 stop bits and this has no effect on the receiver but it may be changed to just 1.
+
+3. data encoding [tData(), rData()]
+
+Each data transmission consists of 3 bytes:
+1: start byte (0xff)
+2: data byte
+3: CRC8 checksum
+
+0xff is a good value for start byte because if the start bit of the start byte is missed the stream of 1's will act as a "NOP slide" instead of throwing the system off sync.
+
+The overall overhead is ~300%. That means for each 8 bits of data, ~32 bits must be transmitted.
