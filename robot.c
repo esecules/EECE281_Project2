@@ -15,10 +15,10 @@
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
 //Motor Pins
-#define RWHEEL_R	P3_6
-#define RWHEEL_B	P3_7
-#define LWHEEL_R	P3_4
-#define LWHEEL_B	P3_5
+#define RWHEEL_B	P3_6
+#define RWHEEL_R	P3_7
+#define LWHEEL_B	P3_4
+#define LWHEEL_R	P3_5
 #define SENSE_LEFT 	0
 #define SENSE_RIGHT 1
 #define FORWARD 	1
