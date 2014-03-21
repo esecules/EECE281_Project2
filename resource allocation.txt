@@ -11,8 +11,9 @@ P1.4-1.7: SPI ADC
 ====BEACON====
 Timer1: data TX frequency generation, data TX timing
 
-P1.0-1.3: PS2 controller parallel in
-//CONFLICT
 P1.0-1.1: data out
 P1.2:	  unmodulated data out (for testing)
+P1.3:	  unmodulated data in (for testing)
 P1.4-1.7: SPI ADC (should be removed)
+
+P3.4-3.7: PS2 parallel data in
