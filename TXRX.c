@@ -10,20 +10,20 @@
 #define BRG_VAL (0x100-(CLK/(32L*BAUD)))
 
 #define FREQ 30600L
-#define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
+#define TIMER1_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
 #define H1 P1_0
 #define H2 P1_1
 #define DATAOUT P1_2
 
-#define RXMODE 1
-#define RXTEST 0
-#define RXTESTPIN P1_7
+#define RXMODE 0
+#define RXTEST 1
+#define RXTESTPIN P1_3
 
 #define BITTIME 300
 #define STARTBYTE 0xff
 
-volatile unsigned long int systime;
+volatile unsigned long int datatime;
 volatile unsigned char xOn;
 
 /**
@@ -64,12 +64,13 @@ const unsigned char code crc_table[] = {
 
 void xmtrOn(void);
 void xmtrOff(void);
+void TXRXinit(void);
 
 unsigned char _c51_external_startup(void)
 {
 	// Configure ports as a bidirectional with internal pull-ups.
 	P0M0=0;	P0M1=0;
-	P1M0=0;	P1M1=0x0f;
+	P1M0=0;	P1M1=0x07;
 	P2M0=0;	P2M1=0;
 	P3M0=0;	P3M1=0;
 	AUXR=0B_0001_0001; // 1152 bytes of internal XDATA, P4.4 is a general purpose I/O
@@ -86,32 +87,55 @@ unsigned char _c51_external_startup(void)
 	H1=0;
 	H2=1;
 	
-	TR0=0; // Stop timer 0
-	TMOD=0x01; // 16-bit timer
+	TR1=0; // Stop timer 0
+	TMOD&=0x1f; // 16-bit timer
+	TMOD|=0x10;
 	// Use the autoreload feature available in the AT89LP51RB2
 	// WARNING: There was an error in at89lp51rd2.h that prevents the
 	// autoreload feature to work.  Please download a newer at89lp51rd2.h
 	// file and copy it to the crosside\call51\include folder.
-	TH0=RH0=TIMER0_RELOAD_VALUE/0x100;
-	TL0=RL0=TIMER0_RELOAD_VALUE%0x100;
-	TR0=1; // Start timer 0 (bit 4 in TCON)
-	ET0=1; // Enable timer 0 interrupt
+	TH1=RH1=TIMER1_RELOAD_VALUE/0x100;
+	TL1=RL1=TIMER1_RELOAD_VALUE%0x100;
+	TR1=1; // Start timer 0 (bit 4 in TCON)
+	ET1=1; // Enable timer 0 interrupt
 	EA=1;  // Enable global interrupts
     
-    systime=0;
+    datatime=0;
     xmtrOn();
     
     return 0;
 }
 
-void isr0 (void) interrupt 1
+void TXRXinit(void){
+	P1M0=0;	P1M1=0x07;
+	H1=0;
+	H2=1;
+	
+	TR1=0; // Stop timer 0
+	TMOD&=0x1f; // 16-bit timer
+	TMOD|=0x10;
+	// Use the autoreload feature available in the AT89LP51RB2
+	// WARNING: There was an error in at89lp51rd2.h that prevents the
+	// autoreload feature to work.  Please download a newer at89lp51rd2.h
+	// file and copy it to the crosside\call51\include folder.
+	TH1=RH1=TIMER1_RELOAD_VALUE/0x100;
+	TL1=RL1=TIMER1_RELOAD_VALUE%0x100;
+	TR1=1; // Start timer 0 (bit 4 in TCON)
+	ET1=1; // Enable timer 0 interrupt
+	EA=1;  // Enable global interrupts
+    
+    datatime=0;
+    xmtrOn();
+}
+
+void isr1 (void) interrupt 3
 {
 	if(xOn){
 		H1=!H1;
 		H2=!H2;
 	}
 	
-	systime++;
+	datatime++;
 }
 
 void SPIWrite(unsigned char value)
@@ -144,10 +168,10 @@ unsigned int GetADC(unsigned char channel)
 	return adc;
 }
 
-void t0reset(void){
-	TL0=RL0;
-	TH0=RH0;
-	systime=0;
+void t1reset(void){
+	TL1=RL1;
+	TH1=RH1;
+	datatime=1;
 }
 
 void xmtrOn(void){
@@ -175,8 +199,8 @@ unsigned char rcvr(void){
 }
 
 void wait(unsigned long int time){
-	t0reset();
-	while(systime<time);
+	t1reset();
+	while(datatime<time);
 }
 
 void tByte(unsigned char dabyte){
@@ -184,14 +208,14 @@ void tByte(unsigned char dabyte){
 	xmtrOff();
 	wait(BITTIME);
 	for(i=0; i<8; i++){
-		t0reset();
+		t1reset();
 		if(dabyte&1){
 			xmtrOn();
 		}else{
 			xmtrOff();
 		}
 		dabyte=dabyte>>1;
-		while(systime<BITTIME);
+		while(datatime<BITTIME);
 	}
 	xmtrOn();
 	wait(BITTIME);
@@ -210,9 +234,9 @@ unsigned char rByte(void){
 	while(rcvr());
 	wait(BITTIME*3/2);
 	for(i=0; i<8; i++){
-		t0reset();
+		t1reset();
 		rxdata=(rxdata>>1)+(rcvr()<<7);
-		while(systime<BITTIME);
+		while(datatime<BITTIME);
 	}
 	return rxdata;
 }
