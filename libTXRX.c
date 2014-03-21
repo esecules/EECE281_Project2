@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <at89lp51rd2.h>
 #include "TXRX.h"
+#include "SPI_ADC.c"
 
 // ~C51~ 
  
