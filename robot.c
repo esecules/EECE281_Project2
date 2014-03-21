@@ -57,7 +57,7 @@ volatile unsigned char pwmR=0;
 volatile unsigned int rDirection=0;
 volatile unsigned char lWheel = 0;
 volatile unsigned char rWheel = 0;
-int distance = 0;
+int distance = 10;
 int command = 0;
 int sensativity = 0;
 volatile unsigned long timer = 0;
@@ -339,10 +339,11 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
-	test();
+	//test();
 	while(1){
 		rAmp = getADC(SENSE_RIGHT);
 		lAmp = getADC(SENSE_LEFT);	
+		printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
 			command = getCommand(0);
 			
@@ -374,6 +375,7 @@ void main(void){
 			}
 			command = NONE;
 		}
+		
 		else{
 			if(rAmp < distance + sensativity){
 				rDirection = FORWARD;
