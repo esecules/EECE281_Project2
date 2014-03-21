@@ -5,6 +5,7 @@
 #define BAUD 115200L
 #define TIMER_2_RELOAD (0x10000L-(CLK/(32L*BAUD)))
 
+/*
 #define  NONE	  0
 #define  UP	  2  
 #define  DOWN   4  
@@ -23,7 +24,25 @@
 #define  START   30 
 #define  SELECT   32 
 #define command  0
+*/
 
+#define  NONE	  0
+#define  UP	  1  
+#define  DOWN   2  
+#define  LEFT   3 
+#define  RIGHT   4
+#define  UPRIGHT  5 
+#define  UPLEFT   6 
+#define  DOWNRIGHT   7 
+#define  DOWNLEFT    8 
+#define  R1	  9 
+#define  R2	  10  
+#define  X	  11 
+#define  TRIANGLE   12 
+#define  SQUARE   13 
+#define  CIRCLE   14 
+#define  START   15 
+#define  SELECT   16 
 
 unsigned char _c51_external_startup(void)
 {
@@ -76,8 +95,55 @@ void wait_one_and_half_bit_time (void)
 	_endasm;
 }
 
+unsigned char read4channels()
+{
+	unsigned char val, bit0, bit1, bit2, bit3;
+	
+	val = 0;
+	
+	bit0 = P1_0;
+	bit1 = P1_1;
+	bit2 = P1_2;
+	bit3 = P1_3;
+	
+	if(bit0 == 1) 
+	{
+		val|=(0x01<<0);
+	}
+	else if (bit0 == 0) 
+	{
+		val|=0x00;
+	}
+	if(bit1 == 1) 
+	{
+		val|=(0x01<<1);
+	}
+	else if (bit1 == 0) 
+	{
+		val|=0x00;
+	}
+	if(bit2 == 1) 
+	{
+		val|=(0x01<<2);
+	}
+	else if (bit2 == 0) 
+	{
+		val|=0x00;
+	}
+	if(bit3 == 1) 
+	{
+		val|=(0x01<<3);
+	}
+	else if (bit3 == 0) 
+	{
+		val|=0x00;
+	}
+	return val;
+}
+
 
 //Read
+/*
 unsigned char rx_byte () 
 { 
 	unsigned char j, val; 
@@ -102,44 +168,40 @@ unsigned char rx_byte ()
 	wait_one_and_half_bit_time(); 
 	return val;
 }
-
+*/
 
 
 
 void main (void)
-{
-
+{	
+	unsigned char command;
 	
 	while(1){
-		while(P1_7==1){ //wait for signal to be zero 
-			command = rx_byte(); 
-			printf("%u", (unsigned) command);
-		}
-		
-		
-		
-		 if(command == DOWNRIGHT)
+		//wait for signal to be zero 
+		command = read4channels();
+		//command = rx_byte(); 
+		printf("%u", (unsigned) command);
+				
+		if(command == DOWNRIGHT)
 		{
 			printf("DOWNRIGHT\r\n");
 			command=0;
 		}
-			else if(command == DOWNLEFT)
+		else if(command == DOWNLEFT)
 		{
 			printf("DOWNLEFT\r\n");
 			command=0;
 		}
-			else if(command == UPRIGHT)
+		else if(command == UPRIGHT)
 		{
 			printf("UPRIGHT\r\n");
 			command=0;
 		}
-			else if(command == UPLEFT)
+		else if(command == UPLEFT)
 		{
 			printf("UPLEFT\r\n");
 			command=0;
-		}
-		
-		
+		}		
 		else if(command == UP)
 		{	
 			printf("UP\r\n");
@@ -160,9 +222,6 @@ void main (void)
 			printf("RIGHT\r\n");
 			command=0;
 		}
-		
-		
-		
 		else if(command == SELECT)
 		{
 			printf("Select Pressed - Change Modes\r\n");
@@ -173,9 +232,6 @@ void main (void)
 			printf("START\r\n");
 			command=0;
 		}
-		
-		
-		
 		else if(command == X)
 		{
 			printf("X\r\n");
@@ -196,8 +252,6 @@ void main (void)
 			printf("CIRCLE\r\n");
 			command=0;
 		}
-		
-		
 		else if(command == R1)
 		{
 			printf("R1\r\n");
@@ -213,6 +267,4 @@ void main (void)
 			command=0;
 		}
 	}
-	
-
 }
