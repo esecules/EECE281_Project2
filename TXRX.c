@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <at89lp51rd2.h>
-#include <float.h>
-#include "SPI_ADC.h"
 #include "TXRX.h"
 
 // ~C51~ 

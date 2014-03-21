@@ -1,3 +1,5 @@
+#include "SPI_ADC.h"
+
 #define FREQ1 30600L
 #define TIMER1_RELOAD_VALUE (65536L-(CLK/(12L*FREQ1)))
 
