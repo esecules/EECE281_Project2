@@ -168,16 +168,16 @@ void rotate(char direction, int angle){
 		case CLOCK:
 			rDirection = BACK;
 			lDirection = FORWARD;
-			pwmL = 100;
-			pwmR = 100;
+			pwmL = 50;
+			pwmR = 50;
 			rWheel = 1;
 			lWheel = 1;
 			break;
 		case C_CLOCK:
 			rDirection = FORWARD;
 			lDirection = BACK;
-			pwmL = 100;
-			pwmR = 100;
+			pwmL = 50;
+			pwmR = 50;
 			rWheel = 1;
 			lWheel = 1;
 			break;
@@ -196,8 +196,8 @@ void rotate(char direction, int angle){
 void moveDistance (double distance, char direction) {
 	rDirection = direction;
 	lDirection = direction;
-	pwmL = 100;
-	pwmR = 100;
+	pwmL = 50;
+	pwmR = 50;
 	timer = 0;
 	rWheel = 1;
 	lWheel = 1;
@@ -234,6 +234,8 @@ void test(void){
 	while(1){
 		moveDistance(5,FORWARD);
 		moveDistance(5,BACK);
+		rotate(45,CLOCK);
+		rotate(45,C_CLOCK);
 	}
 	
 }
