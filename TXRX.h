@@ -7,7 +7,6 @@
 #define H2 P1_1
 #define DATAOUT P1_2
 
-#define RXMODE 1
 #define RXTEST 1
 #define RXTESTPIN P1_3
 

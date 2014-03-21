@@ -3,6 +3,8 @@
 #include <at89lp51rd2.h>
 #include "TXRX.h"
 
+#define RXMODE 1
+
 // ~C51~ 
  
 #define CLK 22118400L
@@ -167,7 +169,7 @@ void main(void){
 		while(1){
 			if(!(int)rcvr()){
 			dadata=rData();
-			printf("%c",dadata);
+			printf("%u\n",dadata);
 			}
 		}
 	}else{
