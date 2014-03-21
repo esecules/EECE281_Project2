@@ -16,7 +16,7 @@
 #define H2 P1_1
 #define DATAOUT P1_2
 
-#define RXMODE 0
+#define RXMODE 1
 #define RXTEST 1
 #define RXTESTPIN P1_3
 
@@ -171,7 +171,7 @@ unsigned int GetADC(unsigned char channel)
 void t1reset(void){
 	TL1=RL1;
 	TH1=RH1;
-	datatime=1;
+	datatime=0;
 }
 
 void xmtrOn(void){
