@@ -71,7 +71,7 @@ unsigned char rcvr(void){
 	if(RXTEST){
 		return RXTESTPIN?1:0;
 	}else{
-		return (GetADC(0)>20)?1:0;
+		return (GetADC(0)>TXRXTHRESH)?1:0;
 	}
 }
 

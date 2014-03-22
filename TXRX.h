@@ -10,6 +10,7 @@
 #define RXTEST 0
 #define RXTESTPIN P1_3
 
+#define TXRXTHRESH 10
 #define BITTIME 300
 #define STARTBYTE 0xff
 

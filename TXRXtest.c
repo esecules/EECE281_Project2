@@ -43,7 +43,7 @@ void main(void){
 		while(1){
 			if(!(int)rcvr()){
 			dadata=rData();
-			printf("%c",dadata);
+			printf("%x\n",dadata);
 			}
 		}
 	}else{
