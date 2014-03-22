@@ -3,7 +3,7 @@
 #include <at89lp51rd2.h>
 #include "libTXRX.c"
 
-#define RXMODE 1
+#define RXMODE 0
 
 #define CLK 22118400L
 #define BAUD 115200L
@@ -49,7 +49,7 @@ void main(void){
 	}else{
 		while(1){
 				while(teststr[i]!=0){
-					tData(teststr[i]);
+					//tData(teststr[i]);
 					i++;
 				}
 				i=0;
