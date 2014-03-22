@@ -186,7 +186,7 @@ void rotate(char direction, int angle){
 			lWheel = 0;
 			break;
 		}
-	while(timer < (angle/360)*SEC_ROT*10){}
+	while( timer < (angle/360.0)*WHEEL_CIRCUMFERENCE*SEC_ROT*2.35){} ;
 		rWheel = 0;
 		lWheel = 0;
 	
@@ -201,15 +201,18 @@ void moveDistance (double distance, char direction) {
 	timer = 0;
 	rWheel = 1;
 	lWheel = 1;
-	while(timer< (10.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT){}
+	while(timer < (4.0/3.0*21.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT){};
+	rWheel = 0;
+	lWheel = 0;
 }
 
 
 void doPark(void){
 
+	
 	rotate(C_CLOCK,45);
-	moveDistance(26.0,BACK);
-	rotate(CLOCK,45);
+	moveDistance(23.0,BACK);
+	rotate(CLOCK,40);
 }
 
 unsigned char getCommand ( int min ){
@@ -231,12 +234,15 @@ unsigned char getCommand ( int min ){
 	return val;
 }
 void test(void){
-	while(1){
-		moveDistance(5,FORWARD);
-		moveDistance(5,BACK);
-		rotate(45,CLOCK);
-		rotate(45,C_CLOCK);
+	int counter = 0;
+	while( 1 )
+	{
+	
+	moveDistance(25.0, BACK);
+	moveDistance(25.0, FORWARD);
+	
 	}
+	
 	
 }
 void doManualDrive(){
@@ -339,7 +345,7 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
-	//test();
+	doPark();
 	while(1){
 		rAmp = getADC(SENSE_RIGHT);
 		lAmp = getADC(SENSE_LEFT);	
