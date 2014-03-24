@@ -28,20 +28,20 @@
 
 //Commands
 #define NONE			0	
-#define PARK			24
-#define ROT180			28
-#define CRANE_UP		18
-#define CRANE_DOWN		20
-#define MOVE_LEFT		6
-#define MOVE_RIGHT		8
-#define MOVE_BACK		4
-#define MOVE_FORWARD	2
-#define MOVE_FR			10
-#define MOVE_FL			12
-#define MOVE_BR			14
-#define MOVE_BL			16
-#define MANUAL_DRIVE	32
-#define RETRACE			30
+#define PARK			12
+#define ROT180			14
+#define CRANE_UP		9
+#define CRANE_DOWN		10
+#define MOVE_LEFT		3
+#define MOVE_RIGHT		4
+#define MOVE_BACK		2
+#define MOVE_FORWARD	1
+#define MOVE_FR			5
+#define MOVE_FL			6
+#define MOVE_BR			7
+#define MOVE_BL			8
+#define MANUAL_DRIVE	15
+#define RETRACE			11
 //Increment for distance
 #define STEP 			20
 #define MAX_DISTANCE	200
