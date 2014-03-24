@@ -186,9 +186,10 @@ void main (void)
 		//wait for signal to be zero 
 		command = read4channels();
 		//command = rx_byte(); 
-		printf("%u", (unsigned) command);
+	
 		
 		if(command>0) {
+			printf("%u", (unsigned) command);
 			tData(command);
 		}
 	
