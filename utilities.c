@@ -1,36 +1,59 @@
-//Utilities file for functions like wait
-void wait_bit_time (void)
-{
-	_asm
-	;For a 22.1184MHz crystal one machine cycle 
-	;takes 12/22.1184MHz=0.5425347us
+#include "TXRX.h"
+#define CLK 22118400L
+
+volatile unsigned long int datatime;
+void TXRXinit(void){
+	// all port 1 is belong to us
+	P1M0=0;	P1M1=0x07;
+	// Init H Bridge control pins
 	
-	 mov R1, #250
-	N2:
-	 mov R0, #184
-	N1:
-	djnz R0, N1 ; //2 machine cycles-> 2*0.5425347us*184=200us
-	djnz R1, N2 ; //200us*250=0.05s
-
-	ret
-	_endasm;
+	TR1=0; // Stop timer 0
+	TMOD&=0x1f; // 16-bit timer
+	TMOD|=0x10;
+	// Use the autoreload feature available in the AT89LP51RB2
+	// WARNING: There was an error in at89lp51rd2.h that prevents the
+	// autoreload feature to work.  Please download a newer at89lp51rd2.h
+	// file and copy it to the crosside\call51\include folder.
+	TH1=RH1=TIMER1_RELOAD_VALUE/0x100;
+	TL1=RL1=TIMER1_RELOAD_VALUE%0x100;
+	TR1=1; // Start timer 0 (bit 4 in TCON)
+	ET1=1; // Enable timer 0 interrupt
+	
+    
+    datatime=0;
 }
-void wait_one_and_half_bit_time (void)
-{
-	_asm
-	;For a 22.1184MHz crystal one machine cycle 
-	;takes 12/22.1184MHz=0.5425347us
+void isr1 (void) interrupt 3
+{	
+	datatime++;
+}
 
-	 mov R2, #3
-	M3:
-	 mov R1, #125
-	M2:
-	 mov R0, #184
-	M1: 
-	djnz R0, M1 ; 2 machine cycles-> 2*0.5425347us*184=200us
-	djnz R1, M2 ; 200us*125=0.025s
-	DJNZ R2, M3 ; 3*0.025s= 0.075s
+void t1reset(void){
+	TL1=RL1;
+	TH1=RH1;
+	datatime=0;
+}
 
-	ret
-	_endasm;
+unsigned char rcvr(void){
+	if(RXTEST){
+		return RXTESTPIN?1:0;
+	}else{
+		return (GetADC(0)>20)?1:0;
+	}
+}
+void wait(unsigned long int time){
+	t1reset();
+	while(datatime<time);
+}
+
+unsigned char rByte(void){
+	unsigned char rxdata=0;
+	char i=0;
+	while(rcvr());
+	wait(BITTIME*3/2);
+	for(i=0; i<8; i++){
+		t1reset();
+		rxdata=(rxdata>>1)+(rcvr()<<7);
+		while(datatime<BITTIME);
+	}
+	return rxdata;
 }
