@@ -123,8 +123,8 @@ void pwmcounter (void) interrupt 1
 			LWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=1;
-		LWHEEL_R=1;
+		LWHEEL_B=0;
+		LWHEEL_R=0;
 	}
 	
 	if(rWheel){
@@ -138,8 +138,8 @@ void pwmcounter (void) interrupt 1
 			RWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=1;
-		LWHEEL_R=1;
+		LWHEEL_B=0;
+		LWHEEL_R=0;
 	}
 	
 	if(crane){
@@ -233,6 +233,7 @@ void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
+	printf("E---ntering Manual Drive---");
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
@@ -253,65 +254,66 @@ void doManualDrive(){
 					moveCrane(CRANE_DOWN);
 					break;
 				case MANUAL_DRIVE:
+					printf("---Exiting Manual Drive---");
 					return;
 				case MOVE_RIGHT:
 					rDirection = BACK;
 					lDirection = FORWARD;
-					pwmL = 100;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_LEFT:
 					rDirection = FORWARD;
 					lDirection = BACK;
-					pwmL = 100;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_BACK:
 					rDirection = BACK;
 					lDirection = BACK;
-					pwmL = 100;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_FORWARD:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
-					pwmL = 100;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
 				case MOVE_FR:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
-					pwmL = 100;
-					pwmR = 75;
+					pwmL = 75;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 				case MOVE_FL:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
-					pwmL = 75;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 75;
 					rWheel = 1;
 					lWheel = 1;
 				case MOVE_BR:
 					rDirection = BACK;
 					lDirection = BACK;
-					pwmL = 100;
-					pwmR = 75;
+					pwmL = 75;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 				case MOVE_BL:
 					rDirection = BACK;
 					lDirection = BACK;
-					pwmL = 75;
-					pwmR = 100;
+					pwmL = 50;
+					pwmR = 75;
 					rWheel = 1;
 					lWheel = 1;
 				default:
@@ -335,7 +337,7 @@ void main(void){
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
-		printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
+		//printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
 			rWheel = 0;
 			lWheel = 0;
@@ -351,11 +353,11 @@ void main(void){
 					rotate(180,CLOCK);
 					break;
 				case MOVE_FORWARD:
-					distance -= STEP;
+					distance += STEP;
 					if(distance < 0) distance = 0;
 					break;
 				case MOVE_BACK:
-					distance += STEP;
+					distance -= STEP;
 					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
 					break;
 				case CRANE_UP:
