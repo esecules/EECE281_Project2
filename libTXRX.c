@@ -68,11 +68,17 @@ void xmtrOff(void){
 }
 
 unsigned char rcvr(void){
+	unsigned char temp;
+	DATAOUT = 0;
 	if(RXTEST){
+		DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		return (GetADC(0)>TXRXTHRESH)?1:0;
+		temp = (GetADC(0)>TXRXTHRESH)?1:0;
+		DATAOUT = 1;
+		return temp;
 	}
+	
 }
 
 void wait(unsigned long int time){
@@ -111,7 +117,7 @@ unsigned char rByte(void){
 	unsigned char rxdata=0;
 	char i=0;
 	while(rcvr());
-	wait(BITTIME*3/2);
+	wait(BITTIME*2/2);
 	for(i=0; i<8; i++){
 		t1reset();
 		rxdata=(rxdata>>1)+(rcvr()<<7);
