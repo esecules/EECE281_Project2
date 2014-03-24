@@ -1,7 +1,7 @@
 //The main code for the car goes here
 #include <stdio.h> 
 #include <at89lp51rd2.h>
-#include "utilities.c"
+#include "libTXRX.c"
 
 // ~C51~
 #define REF 1
@@ -19,12 +19,16 @@
 #define RWHEEL_R	P3_7
 #define LWHEEL_B	P3_4
 #define LWHEEL_R	P3_5
+#define CRANE_R		P3_4
+#define	CRANE_B		P3_3
 #define SENSE_LEFT 	0
 #define SENSE_RIGHT 1
 #define FORWARD 	1
 #define BACK 		0
 #define CLOCK		1
 #define C_CLOCK		0
+#define UP			1
+#define	DOWN		0
 
 //Commands
 #define NONE			0	
@@ -57,6 +61,9 @@ volatile unsigned char pwmR=0;
 volatile unsigned int rDirection=0;
 volatile unsigned char lWheel = 0;
 volatile unsigned char rWheel = 0;
+volatile unsigned char pwmC = 0;
+volatile unsigned char cDirection = 0;
+volatile unsigned char crane = 0;
 int distance = 10;
 int command = 0;
 int sensativity = 0;
@@ -90,10 +97,10 @@ unsigned char _c51_external_startup(void)
 	TL0=RL0=TIMER0_RELOAD_VALUE%0x100;
 	TR0=1; // Start timer 0 (bit 4 in TCON)
 	ET0=1; // Enable timer 0 interrupt
-	EA=1;  // Enable global interrupts
 	
 	pwmcount=0;
-    
+    TXRXinit();
+    EA=1;  // Enable global interrupts
     return 0;
 }
 	
@@ -108,57 +115,57 @@ void pwmcounter (void) interrupt 1
 	if(lWheel){
 		if(lDirection==FORWARD){
 			LWHEEL_R=(pwmL>pwmcount)?0:1;
-			LWHEEL_B=1;
+			LWHEEL_B=0;
 		}
 	
-		if(lDirection==BACK){
+		else if(lDirection==BACK){
 			LWHEEL_B=(pwmL>pwmcount)?0:1;
-			LWHEEL_R=1;
+			LWHEEL_R=0;
 		}
+	}else{
+		LWHEEL_B=0;
+		LWHEEL_R=0;
 	}
+	
 	if(rWheel){
 		if(rDirection==FORWARD){
 			RWHEEL_R=(pwmR>pwmcount)?0:1;
-			RWHEEL_B=1;
+			RWHEEL_B=0;
 		}
 	
-		if(rDirection==BACK){
+		else if(rDirection==BACK){
 			RWHEEL_B=(pwmR>pwmcount)?0:1;
-			RWHEEL_R=1;
+			RWHEEL_R=0;
 		}
+	}else{
+		LWHEEL_B=0;
+		LWHEEL_R=0;
+	}
+	
+	if(crane){
+		if(cDirection==UP){
+			CRANE_R=(pwmC>pwmcount)?0:1;
+			CRANE_B=0;
+		}
+	
+		else if(cDirection==DOWN){
+			CRANE_B=(pwmC>pwmcount)?0:1;
+			CRANE_R=0;
+		}
+	}else{
+		CRANE_B=0;
+		CRANE_R=0;
 	}
 }
 
-void SPIWrite( unsigned char value) 
-{ 
-	SPSTA&=(~SPIF); // Clear the SPIF flag in SPSTA 
-	SPDAT=value; 
-	while((SPSTA & SPIF)!=SPIF); //Wait for transmission to end 
-}
-unsigned int getADC(unsigned char channel) 
-{ 
-	unsigned int adc;
-	
-	// initialize the SPI port to read the MCP3004 ADC attached to it. 
-	SPCON&=(~SPEN); // Disable SPI 
-	SPCON=MSTR|CPOL|CPHA|SPR1|SPR0|SSDIS; 
-	SPCON|=SPEN; // Enable SPI
-	P1_4=0; // Activate the MCP3004 ADC. 
-	SPIWrite(channel|0x18); // Send start bit, single/diff* bit, D2, D1, and D0 bits. 
-	for(adc=0; adc<10; adc++){}; // Wait for S/H to setup 
-	SPIWrite(0x55); // Read bits 9 down to 4 
-	adc=((SPDAT&0x3f)*0x100); 
-	SPIWrite(0x55); // Read bits 3 down to 0 
-	P1_4=1; // Deactivate the MCP3004 ADC. 
-	adc+=(SPDAT&0xf0); // SPDR contains the low part of the result. 
-	adc>>=4;
-	
-	return adc;
-}
-
-
 
 void moveCrane(char direction){
+	cDirection = direction;
+	pwmC = 50;
+	crane = 1;
+	timer = 0;
+	while(timer < 5){} // NEEDS CALIBRATION!!
+	crane = 0;
 	
 }
 
@@ -215,45 +222,22 @@ void doPark(void){
 	rotate(CLOCK,40);
 }
 
-unsigned char getCommand ( int min ){
-	unsigned char j, val;
-	int v;
-	EA = 0;
-	//Skip the start bit
-	val=0;
-	wait_one_and_half_bit_time();
-	for(j=0; j<8; j++)
-	{
-		v=getADC(0);
-		val|=(v>min)?(0x01<<j):0x00;
-		wait_bit_time();
-	}
-	//Wait for stop bits
-	wait_one_and_half_bit_time();
-	EA = 1;
-	return val;
-}
 void test(void){
 	int counter = 0;
-	while( 1 )
-	{
-	
+	while( 1 ){
 	moveDistance(25.0, BACK);
 	moveDistance(25.0, FORWARD);
-	
 	}
-	
-	
 }
 void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
 	while(1){
-		rAmp = getADC(SENSE_RIGHT);
-		lAmp = getADC(SENSE_LEFT);	
+		rAmp = GetADC(SENSE_RIGHT);
+		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
-			command = getCommand(0);
+			command = rData();
 			
 			switch(command){
 				case PARK:
@@ -347,11 +331,11 @@ void main(void){
 	int command = NONE;
 	doPark();
 	while(1){
-		rAmp = getADC(SENSE_RIGHT);
-		lAmp = getADC(SENSE_LEFT);	
+		rAmp = GetADC(SENSE_RIGHT);
+		lAmp = GetADC(SENSE_LEFT);	
 		printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
-			command = getCommand(0);
+			command = rData();
 			
 			switch(command){
 				case PARK:
