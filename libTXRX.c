@@ -100,9 +100,11 @@ void tByte(unsigned char dabyte){
 }
 
 void tData(unsigned char dadata){
+	ET0 = 0;
 	tByte(STARTBYTE);
 	tByte(dadata);
 	tByte(crc_table[dadata]);
+	ET0 = 1;
 }
 
 unsigned char rByte(void){

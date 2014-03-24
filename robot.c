@@ -19,10 +19,10 @@
 #define RWHEEL_R	P3_7
 #define LWHEEL_B	P3_4
 #define LWHEEL_R	P3_5
-#define CRANE_R		P3_4
-#define	CRANE_B		P3_3
-#define SENSE_LEFT 	0
-#define SENSE_RIGHT 1
+#define CRANE_R		P3_3
+#define	CRANE_B		P3_2
+#define SENSE_LEFT 	1
+#define SENSE_RIGHT 0
 #define FORWARD 	1
 #define BACK 		0
 #define CLOCK		1
@@ -64,9 +64,9 @@ volatile unsigned char rWheel = 0;
 volatile unsigned char pwmC = 0;
 volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
-int distance = 10;
+int distance = 70;
 int command = 0;
-int sensativity = 0;
+int sensativity = 3;
 volatile unsigned long timer = 0;
 volatile unsigned int timercount = 0;
 unsigned char _c51_external_startup(void) 
@@ -115,31 +115,31 @@ void pwmcounter (void) interrupt 1
 	if(lWheel){
 		if(lDirection==FORWARD){
 			LWHEEL_R=(pwmL>pwmcount)?0:1;
-			LWHEEL_B=0;
+			LWHEEL_B=1;
 		}
 	
 		else if(lDirection==BACK){
 			LWHEEL_B=(pwmL>pwmcount)?0:1;
-			LWHEEL_R=0;
+			LWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=0;
-		LWHEEL_R=0;
+		LWHEEL_B=1;
+		LWHEEL_R=1;
 	}
 	
 	if(rWheel){
 		if(rDirection==FORWARD){
 			RWHEEL_R=(pwmR>pwmcount)?0:1;
-			RWHEEL_B=0;
+			RWHEEL_B=1;
 		}
 	
 		else if(rDirection==BACK){
 			RWHEEL_B=(pwmR>pwmcount)?0:1;
-			RWHEEL_R=0;
+			RWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=0;
-		LWHEEL_R=0;
+		LWHEEL_B=1;
+		LWHEEL_R=1;
 	}
 	
 	if(crane){
@@ -215,18 +215,18 @@ void moveDistance (double distance, char direction) {
 
 
 void doPark(void){
-
-	
 	rotate(C_CLOCK,45);
 	moveDistance(23.0,BACK);
 	rotate(CLOCK,40);
+	timer = 0;
+	while (timer < 10){}
 }
 
 void test(void){
 	int counter = 0;
 	while( 1 ){
-	moveDistance(25.0, BACK);
-	moveDistance(25.0, FORWARD);
+	moveDistance(5.0, BACK);
+	moveDistance(5.0, FORWARD);
 	}
 }
 void doManualDrive(){
@@ -315,8 +315,10 @@ void doManualDrive(){
 					rWheel = 1;
 					lWheel = 1;
 				default:
+					printf("DEFAULT\n");
 					rWheel = 0;
 					lWheel = 0;
+					crane =0;
 					break;
 			}
 		}
@@ -335,7 +337,11 @@ void main(void){
 		lAmp = GetADC(SENSE_LEFT);	
 		printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
+			rWheel = 0;
+			lWheel = 0;
+			crane = 0;
 			command = rData();
+			printf("command %d\n",command);
 			
 			switch(command){
 				case PARK:
@@ -361,12 +367,19 @@ void main(void){
 				case MANUAL_DRIVE:
 					doManualDrive();
 					break;
+				case 255: //ERROR
+					printf("error 255\n");
+					rWheel = 0;
+					lWheel = 0;
+					crane = 0;
+					break;
 						
 			}
 			command = NONE;
 		}
 		
 		else{
+			printf("sensing\n");
 			if(rAmp < distance + sensativity){
 				rDirection = FORWARD;
 				tempR = 1;	
