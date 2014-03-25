@@ -47,9 +47,9 @@
 #define MANUAL_DRIVE	15
 #define RETRACE			11
 //Increment for distance
-#define STEP 			20
+#define STEP 			30
 #define MAX_DISTANCE	200
-#define MIN_DISTANCE	20
+#define MIN_DISTANCE	10
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			0.96
@@ -123,8 +123,8 @@ void pwmcounter (void) interrupt 1
 			LWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=0;
-		LWHEEL_R=0;
+		LWHEEL_B=1;
+		LWHEEL_R=1;
 	}
 	
 	if(rWheel){
@@ -138,23 +138,23 @@ void pwmcounter (void) interrupt 1
 			RWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=0;
-		LWHEEL_R=0;
+		LWHEEL_B=1;
+		LWHEEL_R=1;
 	}
 	
 	if(crane){
 		if(cDirection==UP){
 			CRANE_R=(pwmC>pwmcount)?0:1;
-			CRANE_B=0;
+			CRANE_B=1;
 		}
 	
 		else if(cDirection==DOWN){
 			CRANE_B=(pwmC>pwmcount)?0:1;
-			CRANE_R=0;
+			CRANE_R=1;
 		}
 	}else{
-		CRANE_B=0;
-		CRANE_R=0;
+		CRANE_B=1;
+		CRANE_R=1;
 	}
 }
 
@@ -238,8 +238,11 @@ void doManualDrive(){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
+			ET0 = 0;
+			P3 = 0xFF;
 			command = rData();
-			
+			ET0 = 1;
+			printf("manual cmd %d\n",command);
 			switch(command){
 				case PARK:
 					doPark();
@@ -324,7 +327,12 @@ void doManualDrive(){
 					break;
 			}
 		}
-		else command = NONE;
+		else{
+			command = NONE;
+			rWheel = 0;
+			lWheel = 0;
+			crane =0;	
+		}
 	}
 }
 void main(void){
@@ -339,10 +347,11 @@ void main(void){
 		lAmp = GetADC(SENSE_LEFT);	
 		//printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
-			
+			ET0 = 0;
+			P3 = 0xFF;
 			command = rData();
 			printf("command %d\n",command);
-			
+			ET0 = 1;
 			switch(command){
 				case MOVE_FORWARD:
 					distance += STEP;
@@ -350,7 +359,7 @@ void main(void){
 					break;
 				case MOVE_BACK:
 					distance -= STEP;
-					if(distance > MIN_DISTANCE) distance = MIN_DISTANCE;
+					if(distance < MIN_DISTANCE) distance = MIN_DISTANCE;
 					break;
 				case MANUAL_DRIVE:
 					doManualDrive();
@@ -361,13 +370,15 @@ void main(void){
 					lWheel = 0;
 					crane = 0;
 					break;
+					//goto Exit;
 						
 			}
 			command = NONE;
+			
 		}
 		
-		else{
-			//printf("sensing\n");
+		else if (lAmp > MIN_DISTANCE && rAmp > MIN_DISTANCE){
+			//printf("R:%d L:%d\n", rAmp, lAmp);
 			if(rAmp < distance + sensativity){
 				rDirection = FORWARD;
 				tempR = 1;	
@@ -393,4 +404,6 @@ void main(void){
 			lWheel = tempL;
 		}	
 	}
+	Exit:
+	EA = 0;
 }
