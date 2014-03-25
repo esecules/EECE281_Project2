@@ -74,7 +74,7 @@ unsigned char rcvr(void){
 		DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		temp = (((GetADC(0)+GetADC(1))/2)>TXRXTHRESH)?1:0;
+		temp = ((GetADC(0))>TXRXTHRESH)?1:0;
 		DATAOUT = 1;
 		return temp;
 	}
@@ -107,13 +107,14 @@ void tByte(unsigned char dabyte){
 
 void tData(unsigned char dadata){
 	ET0 = 0;
+	/*
 	t1reset();
 	xmtrOff();
 	while(datatime<BITTIME*2);
 	t1reset();
 	xmtrOn();
 	while(datatime<BITTIME*2);
-	
+	*/
 	tByte(STARTBYTE);
 	tByte(dadata);
 	tByte(crc_table[dadata]);
@@ -140,7 +141,8 @@ unsigned char rByte(void){
 unsigned char rData(void){
 	unsigned char rxdata[2];
 	
-	while(rcvr()==0);
+	//while(rcvr()==0);
+	//while(rcvr()==1);
 	
 	if(rByte()!=STARTBYTE){
 		printf("NOT STARTBYTE\n");
