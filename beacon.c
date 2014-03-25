@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <at89lp51rd2.h>
 #include "libTXRX.c"
+#define RXMODE 0
 
 #define CLK 22118400L
 #define BAUD 115200L
