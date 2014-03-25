@@ -49,7 +49,7 @@
 //Increment for distance
 #define STEP 			20
 #define MAX_DISTANCE	200
-#define MIN_DISTANCE	10
+#define MIN_DISTANCE	20
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			0.96
@@ -66,7 +66,7 @@ volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
 int distance = 70;
 int command = 0;
-int sensativity = 3;
+int sensativity = 10;
 volatile unsigned long timer = 0;
 volatile unsigned int timercount = 0;
 unsigned char _c51_external_startup(void) 
@@ -333,38 +333,24 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
-	doPark();
+	//doPark();
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 		//printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
-			rWheel = 0;
-			lWheel = 0;
-			crane = 0;
+			
 			command = rData();
 			printf("command %d\n",command);
 			
 			switch(command){
-				case PARK:
-					doPark();
-					break;
-				case ROT180:
-					rotate(180,CLOCK);
-					break;
 				case MOVE_FORWARD:
 					distance += STEP;
-					if(distance < 0) distance = 0;
+					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
 					break;
 				case MOVE_BACK:
 					distance -= STEP;
-					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
-					break;
-				case CRANE_UP:
-					moveCrane(CRANE_UP);
-					break;
-				case CRANE_DOWN:
-					moveCrane(CRANE_DOWN);
+					if(distance > MIN_DISTANCE) distance = MIN_DISTANCE;
 					break;
 				case MANUAL_DRIVE:
 					doManualDrive();
@@ -381,7 +367,7 @@ void main(void){
 		}
 		
 		else{
-			printf("sensing\n");
+			//printf("sensing\n");
 			if(rAmp < distance + sensativity){
 				rDirection = FORWARD;
 				tempR = 1;	
