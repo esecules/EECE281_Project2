@@ -7,14 +7,14 @@
 #define H2 P1_1
 #define DATAOUT P1_2
 
-#define RXTEST 0
+#define RXTEST 1
 #define RXTESTPIN P1_3
 
 #define TXRXTHRESH 10
-#define BITTIME 600
+#define BITTIME 500
 #define STARTBYTE 0xff
 
-volatile unsigned long int datatime;
+volatile unsigned int datatime;
 volatile unsigned char xOn;
 
 /**

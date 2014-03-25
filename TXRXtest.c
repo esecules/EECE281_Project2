@@ -43,13 +43,14 @@ void main(void){
 		while(1){
 			if(!(int)rcvr()){
 			dadata=rData();
-			printf("%x\n",dadata);
+			printf("%c",dadata);
 			}
 		}
 	}else{
 		while(1){
 				while(teststr[i]!=0){
-					//tData(teststr[i]);
+					tData(teststr[i]);
+					printf("%c", teststr[i]);
 					i++;
 				}
 				i=0;
