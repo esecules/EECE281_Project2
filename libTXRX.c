@@ -125,7 +125,7 @@ unsigned char rByte(void){
 	char i=0;
 	t1reset();
 	while(rcvr()){
-		if(datatime>2*BITTIME)
+		if(datatime>10*BITTIME)
 			return 0xff;
 	}
 	wait(BITTIME*4/3);
