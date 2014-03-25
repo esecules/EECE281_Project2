@@ -11,7 +11,7 @@
 #define RXTESTPIN P1_3
 
 #define TXRXTHRESH 10
-#define BITTIME 300
+#define BITTIME 600
 #define STARTBYTE 0xff
 
 volatile unsigned long int datatime;
