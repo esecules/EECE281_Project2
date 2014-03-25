@@ -46,10 +46,10 @@
 #define MOVE_BL			8
 #define MANUAL_DRIVE	15
 #define RETRACE			11
-//Increment for distance
+//Increment for distance80
 #define STEP 			30
-#define MAX_DISTANCE	200
-#define MIN_DISTANCE	10
+#define MAX_DISTANCE	500
+#define MIN_DISTANCE	25
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			0.96
@@ -66,7 +66,7 @@ volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
 int distance = 70;
 int command = 0;
-int sensativity = 10;
+int sensativity = 0;
 volatile unsigned long timer = 0;
 volatile unsigned int timercount = 0;
 unsigned char _c51_external_startup(void) 
@@ -298,6 +298,7 @@ void doManualDrive(){
 					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
+					break;
 				case MOVE_FL:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
@@ -305,6 +306,7 @@ void doManualDrive(){
 					pwmR = 75;
 					rWheel = 1;
 					lWheel = 1;
+					break;
 				case MOVE_BR:
 					rDirection = BACK;
 					lDirection = BACK;
@@ -312,6 +314,7 @@ void doManualDrive(){
 					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
+					break;
 				case MOVE_BL:
 					rDirection = BACK;
 					lDirection = BACK;
@@ -319,6 +322,7 @@ void doManualDrive(){
 					pwmR = 75;
 					rWheel = 1;
 					lWheel = 1;
+					break;
 				default:
 					printf("DEFAULT\n");
 					rWheel = 0;
@@ -355,11 +359,17 @@ void main(void){
 			switch(command){
 				case MOVE_FORWARD:
 					distance += STEP;
-					if(distance > MAX_DISTANCE) distance = MAX_DISTANCE;
+					if(distance > MAX_DISTANCE){
+					 printf("too close\n");
+					 distance = MAX_DISTANCE;
+					 }
 					break;
 				case MOVE_BACK:
 					distance -= STEP;
-					if(distance < MIN_DISTANCE) distance = MIN_DISTANCE;
+					if(distance < MIN_DISTANCE){
+					 printf("too far");
+					 distance = MIN_DISTANCE;
+					 }
 					break;
 				case MANUAL_DRIVE:
 					doManualDrive();
