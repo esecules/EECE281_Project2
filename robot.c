@@ -46,10 +46,10 @@
 #define MOVE_BL			8
 #define MANUAL_DRIVE	15
 #define RETRACE			11
-//Increment for distance80
+//Increment for amplitude80
 #define STEP 			30
-#define MAX_DISTANCE	500
-#define MIN_DISTANCE	25
+#define MAX_AMPLITUDE	500
+#define MIN_AMPLITUDE	25
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			0.96
@@ -64,7 +64,7 @@ volatile unsigned char rWheel = 0;
 volatile unsigned char pwmC = 0;
 volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
-int distance = 70;
+int idealAmp= 70;
 int command = 0;
 int sensativity = 0;
 volatile unsigned long timer = 0;
@@ -199,8 +199,8 @@ void rotate(char direction, int angle){
 	
 }
 
-//distance must be in centimeters
-void moveDistance (double distance, char direction) {
+//idealAmpmust be in centimeters
+void moveIdealAmp(double amplitude, char direction) {
 	rDirection = direction;
 	lDirection = direction;
 	pwmL = 50;
@@ -208,7 +208,7 @@ void moveDistance (double distance, char direction) {
 	timer = 0;
 	rWheel = 1;
 	lWheel = 1;
-	while(timer < (4.0/3.0*21.0*distance/WHEEL_CIRCUMFERENCE)/SEC_ROT){};
+	while(timer < (4.0/3.0*21.0*amplitude/WHEEL_CIRCUMFERENCE)/SEC_ROT){};
 	rWheel = 0;
 	lWheel = 0;
 }
@@ -216,7 +216,7 @@ void moveDistance (double distance, char direction) {
 
 void doPark(void){
 	rotate(C_CLOCK,45);
-	moveDistance(23.0,BACK);
+	moveAmplitude(23.0,BACK);
 	rotate(CLOCK,40);
 	timer = 0;
 	while (timer < 10){}
@@ -225,15 +225,15 @@ void doPark(void){
 void test(void){
 	int counter = 0;
 	while( 1 ){
-	moveDistance(5.0, BACK);
-	moveDistance(5.0, FORWARD);
+	moveAmplitude(5.0, BACK);
+	moveAmplitude(5.0, FORWARD);
 	}
 }
 void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
-	printf("E---ntering Manual Drive---");
+	printf("---Entering Manual Drive---");
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
@@ -349,7 +349,7 @@ void main(void){
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
-		//printf("distance %d, sensitivity %d, ramp %d, lamp %d\n", distance, sensativity, rAmp, lAmp);
+		//printf("idealAmp%d, sensitivity %d, ramp %d, lamp %d\n", amplitude, sensativity, rAmp, lAmp);
 		if(rAmp == 0 && lAmp ==0){
 			ET0 = 0;
 			P3 = 0xFF;
@@ -358,17 +358,17 @@ void main(void){
 			ET0 = 1;
 			switch(command){
 				case MOVE_FORWARD:
-					distance += STEP;
-					if(distance > MAX_DISTANCE){
+					idealAmp+= STEP;
+					if(idealAmp> MAX_AMPLITUDE){
 					 printf("too close\n");
-					 distance = MAX_DISTANCE;
+					 idealAmp= MAX_AMPLITUDE;
 					 }
 					break;
 				case MOVE_BACK:
-					distance -= STEP;
-					if(distance < MIN_DISTANCE){
+					idealAmp-= STEP;
+					if(idealAmp< MIN_AMPLITUDE){
 					 printf("too far");
-					 distance = MIN_DISTANCE;
+					 idealAmp= MIN_AMPLITUDE;
 					 }
 					break;
 				case MANUAL_DRIVE:
@@ -387,23 +387,23 @@ void main(void){
 			
 		}
 		
-		else if (lAmp > MIN_DISTANCE && rAmp > MIN_DISTANCE){
+		else if (lAmp > MIN_IDEALAMP&& rAmp > MIN_AMPLITUDE){
 			//printf("R:%d L:%d\n", rAmp, lAmp);
-			if(rAmp < distance + sensativity){
+			if(rAmp < idealAmp+ sensativity){
 				rDirection = FORWARD;
 				tempR = 1;	
 			}
-			else if(rAmp > distance - sensativity){
+			else if(rAmp > idealAmp- sensativity){
 				rDirection = BACK;
 				tempR = 1;	
 			}
 			else tempR = 0;
 			
-			if(lAmp < distance + sensativity){
+			if(lAmp < idealAmp+ sensativity){
 				lDirection = FORWARD;
 				tempL = 1;	
 			}
-			else if(lAmp > distance - sensativity){
+			else if(lAmp > idealAmp- sensativity){
 				lDirection = BACK;
 				tempL = 1;	
 			}
