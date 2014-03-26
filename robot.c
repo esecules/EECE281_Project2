@@ -14,6 +14,7 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
+#define TEST 1
 //Motor Pins
 #define RWHEEL_B	P3_6
 #define RWHEEL_R	P3_7
@@ -29,6 +30,7 @@
 #define C_CLOCK		0
 #define UP			1
 #define	DOWN		0
+
 
 //Commands
 #define NONE			0	
@@ -200,7 +202,7 @@ void rotate(char direction, int angle){
 }
 
 //idealAmpmust be in centimeters
-void moveIdealAmp(double amplitude, char direction) {
+void moveDistance(double amplitude, char direction) {
 	rDirection = direction;
 	lDirection = direction;
 	pwmL = 50;
@@ -216,17 +218,16 @@ void moveIdealAmp(double amplitude, char direction) {
 
 void doPark(void){
 	rotate(C_CLOCK,45);
-	moveAmplitude(23.0,BACK);
+	moveDistance(23.0,BACK);
 	rotate(CLOCK,40);
-	timer = 0;
-	while (timer < 10){}
+	
 }
 
 void test(void){
 	int counter = 0;
 	while( 1 ){
-	moveAmplitude(5.0, BACK);
-	moveAmplitude(5.0, FORWARD);
+	moveDistance(5.0, BACK);
+	moveDistance(5.0, FORWARD);
 	}
 }
 void doManualDrive(){
@@ -240,7 +241,11 @@ void doManualDrive(){
 		if(rAmp == 0 && lAmp ==0){
 			ET0 = 0;
 			P3 = 0xFF;
-			command = rData();
+			if(TEST) scanf("%d",&command);
+			else command = rData();
+			rWheel = 0;
+			lWheel = 0;
+			crane =0;
 			ET0 = 1;
 			printf("manual cmd %d\n",command);
 			switch(command){
@@ -248,7 +253,8 @@ void doManualDrive(){
 					doPark();
 					break;
 				case ROT180:
-					rotate(180,CLOCK);
+					printf("rot 180");
+					rotate(CLOCK,180);
 					break;
 				case CRANE_UP:
 					moveCrane(CRANE_UP);
@@ -260,6 +266,7 @@ void doManualDrive(){
 					printf("---Exiting Manual Drive---");
 					return;
 				case MOVE_RIGHT:
+					printf("move right");
 					rDirection = BACK;
 					lDirection = FORWARD;
 					pwmL = 50;
@@ -268,6 +275,7 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_LEFT:
+					printf("move left");
 					rDirection = FORWARD;
 					lDirection = BACK;
 					pwmL = 50;
@@ -276,6 +284,7 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_BACK:
+					printf("move back");
 					rDirection = BACK;
 					lDirection = BACK;
 					pwmL = 50;
@@ -284,6 +293,7 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_FORWARD:
+					printf("move forward");
 					rDirection = FORWARD;
 					lDirection = FORWARD;
 					pwmL = 50;
@@ -336,6 +346,7 @@ void doManualDrive(){
 			rWheel = 0;
 			lWheel = 0;
 			crane =0;	
+			P3 = 0xFF;
 		}
 	}
 }
@@ -347,6 +358,7 @@ void main(void){
 	int command = NONE;
 	//doPark();
 	while(1){
+		if(TEST) doManualDrive();
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 		//printf("idealAmp%d, sensitivity %d, ramp %d, lamp %d\n", amplitude, sensativity, rAmp, lAmp);
@@ -387,7 +399,7 @@ void main(void){
 			
 		}
 		
-		else if (lAmp > MIN_IDEALAMP&& rAmp > MIN_AMPLITUDE){
+		else if (lAmp > MIN_AMPLITUDE && rAmp > MIN_AMPLITUDE){
 			//printf("R:%d L:%d\n", rAmp, lAmp);
 			if(rAmp < idealAmp+ sensativity){
 				rDirection = FORWARD;
@@ -408,6 +420,8 @@ void main(void){
 				tempL = 1;	
 			}
 			else tempL = 0;
+			//tempPWM = abs(((lAmp+rAmp)/2)-idealAmp)*(100/idealAmp);
+			//tempPWM = (tempPWM > 70 ? tempPWM : 70);
 			pwmR = 50;
 			pwmL = 50;
 			rWheel = tempR;
