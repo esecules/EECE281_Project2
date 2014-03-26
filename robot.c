@@ -5,7 +5,7 @@
 
 // ~C51~
 #define REF 1
-#define TEST 0
+#define TEST 1
 #define CLK 22118400L 
 #define BAUD 115200L 
 #define BRG_VAL (0x100-(CLK/(32L*BAUD)))
@@ -61,6 +61,7 @@ volatile unsigned char pwmL=0;
 volatile unsigned int lDirection=0;
 volatile unsigned char pwmR=0;
 volatile unsigned int rDirection=0;
+volatile unsigned char backmode = 0;
 volatile unsigned char lWheel = 0;
 volatile unsigned char rWheel = 0;
 volatile unsigned char pwmC = 0;
@@ -115,12 +116,12 @@ void pwmcounter (void) interrupt 1
 	}
 	
 	if(lWheel){
-		if(lDirection==FORWARD){
+		if(lDirection^backmode==FORWARD){
 			LWHEEL_R=(pwmL>pwmcount)?0:1;
 			LWHEEL_B=1;
 		}
 	
-		else if(lDirection==BACK){
+		else if(lDirection^backmode==BACK){
 			LWHEEL_B=(pwmL>pwmcount)?0:1;
 			LWHEEL_R=1;
 		}
@@ -130,12 +131,12 @@ void pwmcounter (void) interrupt 1
 	}
 	
 	if(rWheel){
-		if(rDirection==FORWARD){
+		if(rDirection^backmode==FORWARD){
 			RWHEEL_R=(pwmR>pwmcount)?0:1;
 			RWHEEL_B=1;
 		}
 	
-		else if(rDirection==BACK){
+		else if(rDirection^backmode==BACK){
 			RWHEEL_B=(pwmR>pwmcount)?0:1;
 			RWHEEL_R=1;
 		}
@@ -217,9 +218,9 @@ void moveDistance(double amplitude, char direction) {
 
 
 void doPark(void){
-	rotate(C_CLOCK,45);
+	rotate(C_CLOCK^backmode,45);
 	moveDistance(23.0,BACK);
-	rotate(CLOCK,40);
+	rotate(CLOCK^backmode,40);
 	
 }
 
@@ -236,8 +237,8 @@ void doManualDrive(){
 	int command = NONE;
 	printf("---Entering Manual Drive---");
 	while(1){
-		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);	
+		//rAmp = GetADC(SENSE_RIGHT);
+		//lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
 			ET0 = 0;
 			P3 = 0xFF;
@@ -252,6 +253,7 @@ void doManualDrive(){
 				case ROT180:
 					printf("rot 180");
 					rotate(CLOCK,45);
+					backmode^=1;
 					break;
 				case CRANE_UP:
 					moveCrane(CRANE_UP);
@@ -264,8 +266,8 @@ void doManualDrive(){
 					return;
 				case MOVE_RIGHT:
 					printf("move right");
-					rDirection = BACK;
-					lDirection = FORWARD;
+					rDirection = BACK^backmode;
+					lDirection = FORWARD^backmode;
 					pwmL = 50;
 					pwmR = 50;
 					rWheel = 1;
@@ -273,8 +275,8 @@ void doManualDrive(){
 					break;
 				case MOVE_LEFT:
 					printf("move left");
-					rDirection = FORWARD;
-					lDirection = BACK;
+					rDirection = FORWARD^backmode;
+					lDirection = BACK^backmode;
 					pwmL = 50;
 					pwmR = 50;
 					rWheel = 1;
@@ -299,6 +301,8 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_FR:
+					if(backmode) goto move_fl;
+				move_fr:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
 					pwmL = 75;
@@ -307,6 +311,8 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_FL:
+					if(backmode) goto move_fr;
+				move_fl:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
 					pwmL = 50;
@@ -315,6 +321,8 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_BR:
+					if(backmode) goto move_bl;
+				move_br:
 					rDirection = BACK;
 					lDirection = BACK;
 					pwmL = 75;
@@ -323,6 +331,8 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case MOVE_BL:
+					if(backmode) goto move_br;
+				move_bl:
 					rDirection = BACK;
 					lDirection = BACK;
 					pwmL = 50;
