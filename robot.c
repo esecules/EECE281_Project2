@@ -14,7 +14,7 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
-#define TEST 1
+#define TEST 0
 //Motor Pins
 #define RWHEEL_B	P3_6
 #define RWHEEL_R	P3_7
@@ -239,10 +239,11 @@ void doManualDrive(){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
-			//ET0 = 0;
+			ET0 = 0;
+			P3 = 0xFF;
 			if(TEST) scanf("%d",&command);
 			else command = rData();
-			//ET0 = 1;
+			ET0 = 1;
 			printf("manual cmd %d\n",command);
 			switch(command){
 				case PARK:
@@ -337,7 +338,7 @@ void doManualDrive(){
 					break;
 			}
 		}
-		else{
+		else if(0){
 			command = NONE;
 			rWheel = 0;
 			lWheel = 0;
