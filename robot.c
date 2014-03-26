@@ -54,7 +54,7 @@
 #define MIN_AMPLITUDE	25
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
-#define SEC_ROT			0.96
+#define SEC_ROT			1.00
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -140,8 +140,8 @@ void pwmcounter (void) interrupt 1
 			RWHEEL_R=1;
 		}
 	}else{
-		LWHEEL_B=1;
-		LWHEEL_R=1;
+		RWHEEL_B=1;
+		RWHEEL_R=1;
 	}
 	
 	if(crane){
@@ -239,14 +239,10 @@ void doManualDrive(){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
-			ET0 = 0;
-			P3 = 0xFF;
+			//ET0 = 0;
 			if(TEST) scanf("%d",&command);
 			else command = rData();
-			rWheel = 0;
-			lWheel = 0;
-			crane =0;
-			ET0 = 1;
+			//ET0 = 1;
 			printf("manual cmd %d\n",command);
 			switch(command){
 				case PARK:
@@ -254,7 +250,7 @@ void doManualDrive(){
 					break;
 				case ROT180:
 					printf("rot 180");
-					rotate(CLOCK,180);
+					rotate(CLOCK,45);
 					break;
 				case CRANE_UP:
 					moveCrane(CRANE_UP);
