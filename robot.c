@@ -59,6 +59,7 @@ volatile unsigned char pwmL=0;
 volatile unsigned int lDirection=0;
 volatile unsigned char pwmR=0;
 volatile unsigned int rDirection=0;
+volatile unsigned char backmode;
 volatile unsigned char lWheel = 0;
 volatile unsigned char rWheel = 0;
 volatile unsigned char pwmC = 0;
@@ -113,12 +114,12 @@ void pwmcounter (void) interrupt 1
 	}
 	
 	if(lWheel){
-		if(lDirection==FORWARD){
+		if(lDirection^backmode==FORWARD){
 			LWHEEL_R=(pwmL>pwmcount)?0:1;
 			LWHEEL_B=1;
 		}
 	
-		else if(lDirection==BACK){
+		else if(lDirection^backmode==BACK){
 			LWHEEL_B=(pwmL>pwmcount)?0:1;
 			LWHEEL_R=1;
 		}
@@ -128,12 +129,12 @@ void pwmcounter (void) interrupt 1
 	}
 	
 	if(rWheel){
-		if(rDirection==FORWARD){
+		if(rDirection^backmode==FORWARD){
 			RWHEEL_R=(pwmR>pwmcount)?0:1;
 			RWHEEL_B=1;
 		}
 	
-		else if(rDirection==BACK){
+		else if(rDirection^backmode==BACK){
 			RWHEEL_B=(pwmR>pwmcount)?0:1;
 			RWHEEL_R=1;
 		}
@@ -249,6 +250,7 @@ void doManualDrive(){
 					break;
 				case ROT180:
 					rotate(180,CLOCK);
+					backmode^=1;
 					break;
 				case CRANE_UP:
 					moveCrane(CRANE_UP);
