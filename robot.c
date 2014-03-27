@@ -14,7 +14,7 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
-#define TEST 0
+#define TEST 1
 //Motor Pins
 #define RWHEEL_B	P3_6
 #define RWHEEL_R	P3_7
@@ -22,6 +22,7 @@
 #define LWHEEL_R	P3_5
 #define CRANE_R		P3_3
 #define	CRANE_B		P3_2
+#define UNDER_PIN	P0_3
 #define SENSE_LEFT 	1
 #define SENSE_RIGHT 0
 #define FORWARD 	1
@@ -48,6 +49,7 @@
 #define MOVE_BL			8
 #define MANUAL_DRIVE	15
 #define RETRACE			11
+#define UNDER_GLOW		13
 //Increment for amplitude80
 #define STEP 			30
 #define MAX_AMPLITUDE	500
@@ -235,6 +237,7 @@ void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
+	UNDER_PIN = 0;
 	printf("---Entering Manual Drive---");
 	while(1){
 		//rAmp = GetADC(SENSE_RIGHT);
@@ -340,6 +343,11 @@ void doManualDrive(){
 					rWheel = 1;
 					lWheel = 1;
 					break;
+				case UNDER_GLOW:
+					if (UNDER_PIN == 1)
+						UNDER_PIN = 0;
+					else
+						UNDER_PIN = 1;
 				default:
 					printf("DEFAULT\n");
 					rWheel = 0;
