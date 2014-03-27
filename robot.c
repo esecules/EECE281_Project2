@@ -72,6 +72,7 @@ volatile unsigned char crane = 0;
 int idealAmp= 70;
 int command = 0;
 int sensativity = 0;
+int park_status = 0;
 volatile unsigned long timer = 0;
 volatile unsigned int timercount = 0;
 unsigned char _c51_external_startup(void) 
@@ -220,9 +221,20 @@ void moveDistance(double amplitude, char direction) {
 
 
 void doPark(void){
-	rotate(C_CLOCK^backmode,45);
-	moveDistance(23.0,BACK);
-	rotate(CLOCK^backmode,40);
+	if ( park_status == 0 )
+	{
+		rotate(C_CLOCK^backmode,45);
+		moveDistance(23.0,BACK);
+		rotate(CLOCK^backmode,40);
+		park_status = 1;
+	}
+	else
+	{
+		rotate(CLOCK^backmode,40);
+		moveDistance(23.0,FORWARD);
+		rotate(C_CLOCK^backmode,45);
+		park_status = 0;
+	}
 	
 }
 
