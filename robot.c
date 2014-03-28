@@ -177,7 +177,7 @@ void moveCrane(char direction){
 
 void rotate(char direction, int angle){
 	timer = 0;
-	switch (direction){
+	switch (direction^backmode){
 		case CLOCK:
 			rDirection = BACK;
 			lDirection = FORWARD;
@@ -223,16 +223,16 @@ void moveDistance(double amplitude, char direction) {
 void doPark(void){
 	if ( park_status == 0 )
 	{
-		rotate(C_CLOCK^backmode,45);
+		rotate(C_CLOCK,45);
 		moveDistance(23.0,BACK);
-		rotate(CLOCK^backmode,40);
+		rotate(CLOCK,40);
 		park_status = 1;
 	}
 	else
 	{
-		rotate(CLOCK^backmode,40);
+		rotate(CLOCK,40);
 		moveDistance(23.0,FORWARD);
-		rotate(C_CLOCK^backmode,45);
+		rotate(C_CLOCK,45);
 		park_status = 0;
 	}
 	
@@ -255,11 +255,13 @@ void doManualDrive(){
 		//rAmp = GetADC(SENSE_RIGHT);
 		//lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
-			ET0 = 0;
-			P3 = 0xFF;
 			if(TEST) scanf("%d",&command);
-			else command = rData();
-			ET0 = 1;
+			else{
+				ET0 = 0;
+				P3 = 0xFF;
+				command = rData();
+				ET0 = 1;
+			}
 			printf("manual cmd %d\n",command);
 			switch(command){
 				case PARK:
@@ -281,8 +283,10 @@ void doManualDrive(){
 					return;
 				case MOVE_RIGHT:
 					printf("move right");
-					rDirection = BACK^backmode;
-					lDirection = FORWARD^backmode;
+					if(backmode) goto move_left;
+				move_right:
+					rDirection = BACK;
+					lDirection = FORWARD;
 					pwmL = 50;
 					pwmR = 50;
 					rWheel = 1;
@@ -290,8 +294,10 @@ void doManualDrive(){
 					break;
 				case MOVE_LEFT:
 					printf("move left");
-					rDirection = FORWARD^backmode;
-					lDirection = BACK^backmode;
+					if(backmode) goto move_right;
+				move_left:
+					rDirection = FORWARD;
+					lDirection = BACK;
 					pwmL = 50;
 					pwmR = 50;
 					rWheel = 1;
