@@ -22,7 +22,9 @@
 #define LWHEEL_R	P3_5
 #define CRANE_R		P3_3
 #define	CRANE_B		P3_2
-#define UNDER_PIN	P0_3
+#define UNDER_PIN_RED	P0_4
+#define UNDER_PIN_GREEN	P0_5
+#define UNDER_PIN_BLUE	P0_3
 #define SENSE_LEFT 	1
 #define SENSE_RIGHT 0
 #define FORWARD 	1
@@ -69,6 +71,7 @@ volatile unsigned char rWheel = 0;
 volatile unsigned char pwmC = 0;
 volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
+volatile unsigned char under_glow_status = 0;
 int idealAmp= 70;
 int command = 0;
 int sensativity = 0;
@@ -238,6 +241,61 @@ void doPark(void){
 	
 }
 
+void doUnderGlow(void)
+{
+
+	//Turns red
+	if (under_glow_status == 0)
+	{
+		UNDER_PIN_BLUE = 1;
+		UNDER_PIN_GREEN = 1;
+		UNDER_PIN_RED = 0;
+		under_glow_status++;
+	}
+	//Turns green
+	else if (under_glow_status == 1)
+	{
+		UNDER_PIN_RED = 1;
+		UNDER_PIN_BLUE = 1;
+		UNDER_PIN_GREEN = 0;
+		under_glow_status++;
+	}
+	//Turns blue
+	else if (under_glow_status == 2)
+	{
+		UNDER_PIN_GREEN = 1;
+		UNDER_PIN_RED = 1;
+		UNDER_PIN_BLUE = 0;
+		under_glow_status++;
+	}
+	//Turns purple
+	else if (under_glow_status == 3)
+	{
+		UNDER_PIN_BLUE = 0;
+		UNDER_PIN_GREEN = 1;
+		UNDER_PIN_RED = 0;
+		under_glow_status++;
+	}
+	//Turns Yellow
+	else if (under_glow_status == 4)
+	{
+		UNDER_PIN_BLUE = 1;
+		UNDER_PIN_GREEN = 0;
+		UNDER_PIN_RED = 0;
+		under_glow_status++;
+	}
+	//Off
+	else
+	{
+		UNDER_PIN_BLUE = 1;
+		UNDER_PIN_GREEN = 1;
+		UNDER_PIN_RED = 1;
+		under_glow_status++;
+		under_glow_status = 0;
+	}
+	
+}
+
 void test(void){
 	int counter = 0;
 	while( 1 ){
@@ -249,7 +307,9 @@ void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
-	UNDER_PIN = 0;
+	UNDER_PIN_RED = 1;
+	UNDER_PIN_GREEN = 1;
+	UNDER_PIN_BLUE = 1;
 	printf("---Entering Manual Drive---");
 	while(1){
 		//rAmp = GetADC(SENSE_RIGHT);
@@ -362,10 +422,7 @@ void doManualDrive(){
 					lWheel = 1;
 					break;
 				case UNDER_GLOW:
-					if (UNDER_PIN == 1)
-						UNDER_PIN = 0;
-					else
-						UNDER_PIN = 1;
+					doUnderGlow();
 				default:
 					printf("DEFAULT\n");
 					rWheel = 0;
