@@ -2,10 +2,11 @@
 #include <stdio.h> 
 #include <at89lp51rd2.h>
 #include "libTXRX.c"
+#define RXMODE 1
 
 // ~C51~
 #define REF 1
-#define TEST 1
+#define TEST 0
 #define CLK 22118400L 
 #define BAUD 115200L 
 #define BRG_VAL (0x100-(CLK/(32L*BAUD)))
@@ -14,7 +15,7 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
-#define TEST 1
+
 //Motor Pins
 #define RWHEEL_B	P3_6
 #define RWHEEL_R	P3_7
@@ -25,8 +26,8 @@
 #define UNDER_PIN_RED	P0_4
 #define UNDER_PIN_GREEN	P0_5
 #define UNDER_PIN_BLUE	P0_3
-#define SENSE_LEFT 	1
-#define SENSE_RIGHT 0
+#define SENSE_LEFT 	0
+#define SENSE_RIGHT 1
 #define FORWARD 	1
 #define BACK 		0
 #define CLOCK		1
@@ -54,8 +55,8 @@
 #define UNDER_GLOW		13
 //Increment for amplitude80
 #define STEP 			30
-#define MAX_AMPLITUDE	500
-#define MIN_AMPLITUDE	25
+#define MAX_AMPLITUDE	800
+#define MIN_AMPLITUDE	30
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			1.00
@@ -72,7 +73,7 @@ volatile unsigned char pwmC = 0;
 volatile unsigned char cDirection = 0;
 volatile unsigned char crane = 0;
 volatile unsigned char under_glow_status = 0;
-int idealAmp= 70;
+//int idealAmp= 70; //moved into TXRX.h so TXRX.c can see it
 int command = 0;
 int sensativity = 0;
 int park_status = 0;
@@ -233,9 +234,9 @@ void doPark(void){
 	}
 	else
 	{
-		rotate(CLOCK,40);
+		rotate(C_CLOCK,40);
 		moveDistance(23.0,FORWARD);
-		rotate(C_CLOCK,45);
+		rotate(CLOCK,45);
 		park_status = 0;
 	}
 	
@@ -312,8 +313,8 @@ void doManualDrive(){
 	UNDER_PIN_BLUE = 1;
 	printf("---Entering Manual Drive---");
 	while(1){
-		//rAmp = GetADC(SENSE_RIGHT);
-		//lAmp = GetADC(SENSE_LEFT);	
+		rAmp = GetADC(SENSE_RIGHT);
+		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
 			if(TEST) scanf("%d",&command);
 			else{
@@ -329,7 +330,7 @@ void doManualDrive(){
 					break;
 				case ROT180:
 					printf("rot 180");
-					rotate(CLOCK,45);
+					rotate(CLOCK,180);
 					backmode^=1;
 					break;
 				case CRANE_UP:
@@ -451,13 +452,13 @@ void main(void){
 		if(TEST) doManualDrive();
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
-		//printf("idealAmp%d, sensitivity %d, ramp %d, lamp %d\n", amplitude, sensativity, rAmp, lAmp);
-		if(rAmp == 0 && lAmp ==0){
+	//	printf("idealAmp%d,ramp %d, lamp %d\n", amplitude, rAmp, lAmp);
+		if(rAmp < idealAmp/5 && lAmp < idealAmp/5){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
-			printf("command %d\n",command);
 			ET0 = 1;
+			printf("command %d\n",command);
 			switch(command){
 				case MOVE_FORWARD:
 					idealAmp+= STEP;
@@ -477,7 +478,7 @@ void main(void){
 					doManualDrive();
 					break;
 				case 255: //ERROR
-					printf("error 255\n");
+					//printf("error 255\n");
 					rWheel = 0;
 					lWheel = 0;
 					crane = 0;

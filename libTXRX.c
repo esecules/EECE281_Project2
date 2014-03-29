@@ -37,11 +37,12 @@ void TXRXinit(void){
 
 void isr1 (void) interrupt 3
 {
+	#ifndef RXMODE
 	if(xOn){
 		H1=!H1;
 		H2=!H2;
 	}
-	
+	#endif
 	datatime++;
 }
 
@@ -69,13 +70,13 @@ void xmtrOff(void){
 
 unsigned char rcvr(void){
 	unsigned char temp;
-	DATAOUT = 0;
+	//DATAOUT = 0;
 	if(RXTEST){
-		DATAOUT = 1;
+		//DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		temp = ((GetADC(0))>TXRXTHRESH)?1:0;
-		DATAOUT = 1;
+		temp = ((GetADC(0))>idealAmp/5)?1:0;
+		//DATAOUT = 1;
 		return temp;
 	}
 	
@@ -143,9 +144,9 @@ unsigned char rData(void){
 	
 	//while(rcvr()==0);
 	//while(rcvr()==1);
-	
-	if(rByte()!=STARTBYTE){
-		printf("NOT STARTBYTE\n");
+	rxdata[0]=rByte();
+	if(rxdata[0]!=STARTBYTE){
+		printf("NOT STARTBYTE (0x%x)\n",rxdata[0]);
 		return STARTBYTE;
 	}
 	

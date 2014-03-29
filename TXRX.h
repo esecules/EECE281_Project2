@@ -10,12 +10,13 @@
 #define RXTEST 0
 #define RXTESTPIN P1_3
 
-#define TXRXTHRESH 10
+#define TXRXTHRESH 20
 #define BITTIME 300
 #define STARTBYTE 0xff
 
 volatile unsigned long int datatime;
 volatile unsigned char xOn;
+int idealAmp=70;
 
 /**
 * A lookup table for CRC-8, poly = x^8 + x^2 + x^1 + x^0, init = 0.
