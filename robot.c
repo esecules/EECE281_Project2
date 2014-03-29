@@ -6,7 +6,7 @@
 
 // ~C51~
 #define REF 1
-#define TEST 0
+#define TEST 1
 #define CLK 22118400L 
 #define BAUD 115200L 
 #define BRG_VAL (0x100-(CLK/(32L*BAUD)))
@@ -55,7 +55,7 @@
 #define UNDER_GLOW		13
 //Increment for amplitude80
 #define STEP 			30
-#define MAX_AMPLITUDE	800
+#define MAX_AMPLITUDE	950
 #define MIN_AMPLITUDE	30
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
@@ -308,13 +308,10 @@ void doManualDrive(){
 	int rAmp = 0;
 	int lAmp = 0;
 	int command = NONE;
-	UNDER_PIN_RED = 1;
-	UNDER_PIN_GREEN = 1;
-	UNDER_PIN_BLUE = 1;
 	printf("---Entering Manual Drive---");
 	while(1){
-		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);	
+		//rAmp = GetADC(SENSE_RIGHT);
+		//lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
 			if(TEST) scanf("%d",&command);
 			else{
@@ -447,9 +444,13 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
+	UNDER_PIN_RED = 1;
+	UNDER_PIN_GREEN = 1;
+	UNDER_PIN_BLUE = 1;
 	//doPark();
 	while(1){
-		if(TEST) doManualDrive();
+		if(TEST) 
+			doManualDrive();
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);	
 	//	printf("idealAmp%d,ramp %d, lamp %d\n", amplitude, rAmp, lAmp);
