@@ -31,6 +31,8 @@ void TXRXinit(void){
 	ET1=1; // Enable timer 0 interrupt
 	EA=1;  // Enable global interrupts
     
+    SPIinit();
+    
     datatime=0;
     xmtrOn();
 }
@@ -75,7 +77,7 @@ unsigned char rcvr(void){
 		//DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		temp = ((GetADC(0))>idealAmp/5)?1:0;
+		temp = ((read3004(0))>idealAmp/5)?1:0;
 		//DATAOUT = 1;
 		return temp;
 	}
@@ -102,23 +104,15 @@ void tByte(unsigned char dabyte){
 		while(datatime<BITTIME);
 	}
 	xmtrOn();
-	wait(BITTIME);
-	wait(BITTIME);
+	wait(BITTIME*2);
 }
 
 void tData(unsigned char dadata){
 	ET0 = 0;
-	/*
-	t1reset();
-	xmtrOff();
-	while(datatime<BITTIME*2);
-	t1reset();
-	xmtrOn();
-	while(datatime<BITTIME*2);
-	*/
 	tByte(STARTBYTE);
 	tByte(dadata);
 	tByte(crc_table[dadata]);
+	wait(BITTIME*8);
 	ET0 = 1;
 }
 
@@ -138,13 +132,27 @@ unsigned char rByte(void){
 	}
 	return rxdata;
 }
+
+//for reading startbyte
+unsigned char rByte1(void){
+	unsigned char rxdata=0;
+	char i=0;
+	t1reset();
+
+	while(!rcvr());
+	wait(BITTIME/2);
+	for(i=0; i<8; i++){
+		t1reset();
+		rxdata=(rxdata>>1)+(rcvr()<<7);
+		while(datatime<BITTIME);
+	}
+	return rxdata;
+}
 	
 unsigned char rData(void){
 	unsigned char rxdata[2];
-	
-	//while(rcvr()==0);
-	//while(rcvr()==1);
-	rxdata[0]=rByte();
+
+	rxdata[0]=rByte1();
 	if(rxdata[0]!=STARTBYTE){
 		printf("NOT STARTBYTE (0x%x)\n",rxdata[0]);
 		return STARTBYTE;

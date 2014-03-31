@@ -6,7 +6,7 @@
 
 // ~C51~
 #define REF 1
-#define TEST 1
+#define TEST 0
 #define CLK 22118400L 
 #define BAUD 115200L 
 #define BRG_VAL (0x100-(CLK/(32L*BAUD)))
@@ -110,6 +110,7 @@ unsigned char _c51_external_startup(void)
 	
 	pwmcount=0;
     TXRXinit();
+    SPIinit();
     EA=1;  // Enable global interrupts
     return 0;
 }
@@ -310,8 +311,8 @@ void doManualDrive(){
 	int command = NONE;
 	printf("---Entering Manual Drive---");
 	while(1){
-		//rAmp = GetADC(SENSE_RIGHT);
-		//lAmp = GetADC(SENSE_LEFT);	
+		rAmp = read3004(SENSE_RIGHT);
+		lAmp = read3004(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
 			if(TEST) scanf("%d",&command);
 			else{
@@ -449,17 +450,16 @@ void main(void){
 	UNDER_PIN_BLUE = 1;
 	//doPark();
 	while(1){
-		if(TEST) 
-			doManualDrive();
-		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);	
+		if(TEST) doManualDrive();
+		rAmp = read3004(SENSE_RIGHT);
+		lAmp = read3004(SENSE_LEFT);	
 	//	printf("idealAmp%d,ramp %d, lamp %d\n", amplitude, rAmp, lAmp);
-		if(rAmp < idealAmp/5 && lAmp < idealAmp/5){
+		if(lAmp < idealAmp/5 && rAmp < idealAmp/5){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
 			ET0 = 1;
-			printf("command %d\n",command);
+			printf("command %d %c\n",command,command);
 			switch(command){
 				case MOVE_FORWARD:
 					idealAmp+= STEP;

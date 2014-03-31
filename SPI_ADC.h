@@ -11,6 +11,8 @@
 // CH2   -        - pin 3
 // CH3   -        - pin 4
 
+#define MCP3004 P1_4
+
 void SPIWrite(unsigned char value);
 unsigned int GetADC(unsigned char channel);
 float voltage (unsigned char channel);
