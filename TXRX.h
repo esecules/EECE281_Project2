@@ -7,7 +7,7 @@
 #define H2 P1_1
 #define DATAOUT P1_2
 
-#define RXTEST 0
+#define RXTEST 1
 #define RXTESTPIN P1_3
 
 #define TXRXTHRESH 20
