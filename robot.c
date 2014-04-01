@@ -27,6 +27,8 @@
 #define UNDER_PIN_GREEN	P0_5
 #define UNDER_PIN_BLUE	P0_3
 #define SENSE_LEFT 	0
+#define SENSE_LEFT_SUPP 2
+#define SENSE_RIGHT_SUPP 3
 #define SENSE_RIGHT 1
 #define FORWARD 	1
 #define BACK 		0
@@ -55,7 +57,7 @@
 #define UNDER_GLOW		13
 //Increment for amplitude80
 #define STEP 			30
-#define MAX_AMPLITUDE	950
+#define MAX_AMPLITUDE	1900
 #define MIN_AMPLITUDE	30
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
@@ -451,10 +453,10 @@ void main(void){
 	//doPark();
 	while(1){
 		if(TEST) doManualDrive();
-		rAmp = read3004(SENSE_RIGHT);
-		lAmp = read3004(SENSE_LEFT);	
-	//	printf("idealAmp%d,ramp %d, lamp %d\n", amplitude, rAmp, lAmp);
-		if(lAmp < idealAmp/5 && rAmp < idealAmp/5){
+		rAmp = GetADC(SENSE_RIGHT);//+ read3004(SENSE_RIGHT_SUPP);
+		lAmp = GetADC(SENSE_LEFT);//+ read3004(SENSE_LEFT_SUPP);	
+		printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
+		if(lAmp < idealAmp/40 && rAmp < idealAmp/40){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();

@@ -139,7 +139,10 @@ unsigned char rByte1(void){
 	char i=0;
 	t1reset();
 
-	while(!rcvr());
+	while(!rcvr())
+		if(datatime>10*BITTIME)
+			return 0;
+					
 	wait(BITTIME/2);
 	for(i=0; i<8; i++){
 		t1reset();
@@ -163,7 +166,7 @@ unsigned char rData(void){
 	if(rxdata[1]==crc_table[rxdata[0]]){
 		return rxdata[0];
 	}else{
-		printf("CHECKSUM WRONG %x SHOULD BE %x\n", rxdata[1], crc_table[rxdata[0]]);
+		printf("DATA: %x, CHECKSUM WRONG %x SHOULD BE %x\n", rxdata[0], rxdata[1], crc_table[rxdata[0]]);
 		return STARTBYTE;
 	}
 }
