@@ -31,7 +31,6 @@ void TXRXinit(void){
 	ET1=1; // Enable timer 0 interrupt
 	EA=1;  // Enable global interrupts
     
-    SPIinit();
     
     datatime=0;
     xmtrOn();
@@ -77,7 +76,7 @@ unsigned char rcvr(void){
 		//DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		temp = ((read3004(0))>idealAmp/5)?1:0;
+		temp = ((GetADC(0))>idealAmp/5)?1:0;
 		//DATAOUT = 1;
 		return temp;
 	}
@@ -142,7 +141,6 @@ unsigned char rByte1(void){
 	while(!rcvr())
 		if(datatime>10*BITTIME)
 			return 0;
-					
 	wait(BITTIME/2);
 	for(i=0; i<8; i++){
 		t1reset();

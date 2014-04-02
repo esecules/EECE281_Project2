@@ -112,7 +112,6 @@ unsigned char _c51_external_startup(void)
 	
 	pwmcount=0;
     TXRXinit();
-    SPIinit();
     EA=1;  // Enable global interrupts
     return 0;
 }
@@ -313,8 +312,8 @@ void doManualDrive(){
 	int command = NONE;
 	printf("---Entering Manual Drive---");
 	while(1){
-		rAmp = read3004(SENSE_RIGHT);
-		lAmp = read3004(SENSE_LEFT);	
+		rAmp = GetADC(SENSE_RIGHT);
+		lAmp = GetADC(SENSE_LEFT);	
 		if(rAmp == 0 && lAmp ==0){
 			if(TEST) scanf("%d",&command);
 			else{
@@ -453,8 +452,8 @@ void main(void){
 	//doPark();
 	while(1){
 		if(TEST) doManualDrive();
-		rAmp = GetADC(SENSE_RIGHT);//+ read3004(SENSE_RIGHT_SUPP);
-		lAmp = GetADC(SENSE_LEFT);//+ read3004(SENSE_LEFT_SUPP);	
+		rAmp = GetADC(SENSE_RIGHT);
+		lAmp = GetADC(SENSE_LEFT);
 		printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
 		if(lAmp < idealAmp/40 && rAmp < idealAmp/40){
 			ET0 = 0;

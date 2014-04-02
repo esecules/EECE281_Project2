@@ -42,25 +42,3 @@ unsigned int GetADC(unsigned char channel)
 		
 	return adc;
 }
-
-
-char SPIx(char out){
-	SPDAT=out;
-	while(!(SPSTA & 0x80));
-	return SPDAT;
-}
-
-unsigned int read3004(char channel){
-	
-	unsigned int adcval=0;
-	MCP3004=0;
-	SPIx(0x01);
-	adcval+=(SPIx(0x80+(channel<<4)) & 0x03)*256;
-	adcval+=SPIx(0x55);
-	MCP3004=1;
-	return adcval;
-}
-
-void SPIinit(void){
-	SPCON=0b11110010;
-}
