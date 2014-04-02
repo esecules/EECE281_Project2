@@ -186,14 +186,21 @@ void pwmcounter (void) interrupt 1
 }
 
 void ISRT2(void) interrupt 5{
-	TF2=0;
-	TR0=0;
-	
-	if(!rcvr()){
-		printf("%c", rData());
+//	TF2=0;
+//	TR0=0;
+//	
+//	if(!rcvr()){
+//		printf("%c", rData());
+//	}
+//	
+//	TR0=1;
+	TF2 = 0;
+	if(GetADCSimple(SENSE_LEFT) == 0 && GetADCSimple(SENSE_RIGHT) == 0){
+		TR0 = 0;
+		P3 = 0xff;
+		command = rRdata();
+		TR0 = 1;
 	}
-	
-	TR0=1;
 }
 
 void moveCrane(char direction){
@@ -332,21 +339,11 @@ void test(void){
 	}
 }
 void doManualDrive(){
-	int rAmp = 0;
-	int lAmp = 0;
-	int command = NONE;
 	printf("---Entering Manual Drive---");
 	while(1){
-		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);	
-		if(rAmp == 0 && lAmp ==0){
-			if(TEST) scanf("%d",&command);
-			else{
-				ET0 = 0;
-				P3 = 0xFF;
-				command = rData();
-				ET0 = 1;
-			}
+		if(TEST) scanf("%d",&command);
+		if(command != 0){
+		TR2 = 0; //Don't get new commands while we are using the current command
 			printf("manual cmd %d\n",command);
 			switch(command){
 				case PARK:
@@ -365,6 +362,7 @@ void doManualDrive(){
 					break;
 				case MANUAL_DRIVE:
 					printf("---Exiting Manual Drive---");
+					command = NONE;
 					return;
 				case MOVE_RIGHT:
 					printf("move right");
@@ -411,8 +409,8 @@ void doManualDrive(){
 				move_fr:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
-					pwmL = 75;
-					pwmR = 50;
+					pwmL = 50;
+					pwmR = 25;
 					rWheel = 1;
 					lWheel = 1;
 					break;
@@ -421,8 +419,8 @@ void doManualDrive(){
 				move_fl:
 					rDirection = FORWARD;
 					lDirection = FORWARD;
-					pwmL = 50;
-					pwmR = 75;
+					pwmL = 25;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
@@ -431,8 +429,8 @@ void doManualDrive(){
 				move_br:
 					rDirection = BACK;
 					lDirection = BACK;
-					pwmL = 75;
-					pwmR = 50;
+					pwmL = 50;
+					pwmR = 25;
 					rWheel = 1;
 					lWheel = 1;
 					break;
@@ -441,8 +439,8 @@ void doManualDrive(){
 				move_bl:
 					rDirection = BACK;
 					lDirection = BACK;
-					pwmL = 50;
-					pwmR = 75;
+					pwmL = 25;
+					pwmR = 50;
 					rWheel = 1;
 					lWheel = 1;
 					break;
@@ -456,13 +454,8 @@ void doManualDrive(){
 					break;
 			}
 		}
-		else if(0){
-			command = NONE;
-			rWheel = 0;
-			lWheel = 0;
-			crane =0;	
-			P3 = 0xFF;
-		}
+		command = NONE;
+		TR2 = 1;
 	}
 }
 void main(void){
@@ -470,7 +463,6 @@ void main(void){
 	int rAmp = 0;
 	int lAmp = 0;
 	int tempR, tempL;
-	int command = NONE;
 	UNDER_PIN_RED = 1;
 	UNDER_PIN_GREEN = 1;
 	UNDER_PIN_BLUE = 1;
@@ -480,11 +472,8 @@ void main(void){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);
 		//printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
-		if(lAmp == 0  && rAmp == 0){
-			ET0 = 0;
-			P3 = 0xFF;
-			command = rData();
-			ET0 = 1;
+		if(command != 0){
+		TR2 = 0; //Don't get new commands while we are using the current command
 			printf("command %d %c\n",command,command);
 			switch(command){
 				case MOVE_FORWARD:
@@ -502,6 +491,7 @@ void main(void){
 					 }
 					break;
 				case MANUAL_DRIVE:
+					command = NONE;
 					doManualDrive();
 					break;
 				case 255: //ERROR
@@ -514,7 +504,7 @@ void main(void){
 						
 			}
 			command = NONE;
-			
+			TR2 = 1;
 		}
 		
 		else if (lAmp > MIN_AMPLITUDE && rAmp > MIN_AMPLITUDE){
