@@ -76,7 +76,7 @@ unsigned char rcvr(void){
 		//DATAOUT = 1;
 		return RXTESTPIN?1:0;
 	}else{
-		temp = ((GetADC(0))>idealAmp/5)?1:0;
+		temp = ((GetADC(0))>TXRXTHRESH)?1:0;
 		//DATAOUT = 1;
 		return temp;
 	}

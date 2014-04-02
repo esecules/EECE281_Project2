@@ -58,7 +58,7 @@
 //Increment for amplitude80
 #define STEP 			30
 #define MAX_AMPLITUDE	1900
-#define MIN_AMPLITUDE	30
+#define MIN_AMPLITUDE	1
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			1.00
@@ -454,8 +454,8 @@ void main(void){
 		if(TEST) doManualDrive();
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);
-		printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
-		if(lAmp < idealAmp/40 && rAmp < idealAmp/40){
+		//printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
+		if(lAmp == 0  && rAmp == 0){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
