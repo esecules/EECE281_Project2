@@ -15,6 +15,9 @@
 #define FREQ 10000L
 #define TIMER0_RELOAD_VALUE (65536L-(CLK/(12L*FREQ)))
 
+#define T2FREQ 1000L
+#define T2RLD (65536-CLK/12/T2FREQ)
+
 
 //Motor Pins
 #define RWHEEL_B	P3_6
@@ -111,6 +114,18 @@ unsigned char _c51_external_startup(void)
 	ET0=1; // Enable timer 0 interrupt
 	
 	pwmcount=0;
+	
+	IPH0=0b00001000;
+	IPL0=0b00100000;
+	IPH1=0b00000100;
+	IPL1=0b00000100;
+	
+	TR2=0;
+	RCAP2H=T2RLD/256;
+	RCAP2L=T2RLD%256;
+	ET2=1;
+	TR2=1;
+	
     TXRXinit();
     EA=1;  // Enable global interrupts
     return 0;
@@ -170,6 +185,16 @@ void pwmcounter (void) interrupt 1
 	}
 }
 
+void ISRT2(void) interrupt 5{
+	TF2=0;
+	TR0=0;
+	
+	if(!rcvr()){
+		printf("%c", rData());
+	}
+	
+	TR0=1;
+}
 
 void moveCrane(char direction){
 	cDirection = direction;
