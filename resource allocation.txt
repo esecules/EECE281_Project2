@@ -1,0 +1,19 @@
+====CAR====
+Timer0: motor PWM, system time (0.1s per tick)
+Timer1: data RX timing
+
+P0.0-0.1: left wheel
+P0.2-0.3: right wheel
+P1.0-1.1: 15khz data out (should be removed)
+P1.2:	  unmodulated data out (should be removed)
+P1.4-1.7: SPI ADC
+
+====BEACON====
+Timer1: data TX frequency generation, data TX timing
+
+P1.0-1.1: data out
+P1.2:	  unmodulated data out (for testing)
+P1.3:	  unmodulated data in (for testing)
+P1.4-1.7: SPI ADC (should be removed)
+
+P3.4-3.7: PS2 parallel data in

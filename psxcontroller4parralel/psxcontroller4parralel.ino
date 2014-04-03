@@ -9,25 +9,13 @@
 #include <Psx.h>                       // Includes the Psx Library
 
 Psx Psx;                               // Create an instance of the Psx library
-<<<<<<< HEAD
-=======
 
->>>>>>> 37bd3464c6d14fb5bf41e73fb131b511be1ad810
 const int dataPin  = 2;
 const int cmndPin  = 3;
 const int attPin   = 5;
 const int clockPin = 4;
 const int psxDelay = 50;         // determine the clock delay in microseconds
-<<<<<<< HEAD
 
-unsigned int data = 0;           // data stores the controller response
-
-void setup()
-{
-=======
-const int handshake = 13;
-const int tx = 9;
-const int rx = 10;
 unsigned int data = 0; // data stores the controller response
 
 const unsigned int  iNONE= 0; 
@@ -50,101 +38,72 @@ const unsigned int  iSELECT = 128;
 
 
 const unsigned char  NONE= 0; 
-const unsigned char  UP	= 2;  
-const unsigned char  DOWN =4; 
-const unsigned char  LEFT =6; 
-const unsigned char  RIGHT =8; 
-const unsigned char  URIGHT =10; 
-const unsigned char  ULEFT =12; 
-const unsigned char  DRIGHT =14; 
-const unsigned char  DLEFT  =16; 
-const unsigned char  R1	= 18; 
-const unsigned char  R2	= 20; 
-const unsigned char  X	= 22; 
-const unsigned char  TRIANGLE = 24; 
-const unsigned char  SQUARE = 26; 
-const unsigned char  CIRCLE = 28; 
-const unsigned char  START = 30; 
-const unsigned char  SELECT = 32;
+const unsigned char  UP	= 1;  
+const unsigned char  DOWN =2; 
+const unsigned char  LEFT =3; 
+const unsigned char  RIGHT =4; 
+const unsigned char  URIGHT =5; 
+const unsigned char  ULEFT =6; 
+const unsigned char  DRIGHT =7; 
+const unsigned char  DLEFT  =8; 
+const unsigned char  R1	= 9; 
+const unsigned char  R2	= 10; 
+const unsigned char  X	= 11; 
+const unsigned char  TRIANGLE = 12; 
+const unsigned char  SQUARE = 13; 
+const unsigned char  CIRCLE = 14; 
+const unsigned char  START = 15; 
+
 
 
 void setup()
 {
-  pinMode(tx, OUTPUT);
-  digitalWrite( tx, LOW);
->>>>>>> 37bd3464c6d14fb5bf41e73fb131b511be1ad810
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+ digitalWrite( 8, LOW);
+  digitalWrite( 9, LOW);
+  digitalWrite( 10, LOW);
+  digitalWrite( 11, LOW);
   // initialize the Psx library
   Psx.setupPins(dataPin, cmndPin, attPin, clockPin, psxDelay);
   Serial.begin(9600); // results will be displayed on the Serial Monitor
 }
 
 
-<<<<<<< HEAD
-void loop()
-{
-  data = Psx.read();        // get the psx controller button data
-
-  // check the button bits to see if a button is pressed
-  if(data & 1)
-    Serial.println("left button");
-  if(data & 2)
-    Serial.println("down button");
-  if(data & 4)
-    Serial.println("right button");
-  if(data & 8)
-    Serial.println("up button");
-  if(data & 16)
-    Serial.println("start button");
-  if(data & 128)
-    Serial.println("select button");
-  
-  if(data & 2048)
-    Serial.println("triangle button");
-  if(data & 512)
-    Serial.println("x button");
-  if(data & 1024)
-    Serial.println("circle button");
-  if(data & 256)
-    Serial.println("square button");
-    
-   if(data & 45056)
-    Serial.println("R1 button");
-   if(data & 16384)
-    Serial.println("R2 button");
-
-  delay(100);
-=======
 void bitbanging (unsigned char psxbutton) {
-  int j;
+   int j;
+   int i =8;
   unsigned char txon;
-
-digitalWrite( tx, HIGH);
-delay(50);
-
-for (j=0; j<8; j++)
+  
+for (j=0; j<4; j++)
 {
  txon=psxbutton&(0x01<<j)?1:0;
   if(txon==1) {
-   digitalWrite( tx, HIGH);
+   digitalWrite( i, HIGH);
  }
  else
    {
-   digitalWrite( tx, LOW);
- }
-delay(50);
+   digitalWrite( i, LOW);
+ } 
+ i++;
 }
-
-digitalWrite( tx, LOW);
-//Send the stop bits
-delay(100);
-  
 }
 
 
-void loop()
-{
+void loop() {
+
   data = Psx.read();        // get the psx controller button data
+  
   // check the button bits to see if a button is pressed
+  
+  
+    if(data == iNONE) {//start button
+  Serial.println(data);
+       bitbanging(NONE);
+  } 
+  
     if(data & iLEFT ) { //leftbutton
     Serial.println(data);
        if(data & iUP) {
@@ -215,12 +174,12 @@ void loop()
   Serial.println(data);
        bitbanging(START);
   } 
-  
+  /*
   if(data & iSELECT) {//select button
   Serial.println(data);
       bitbanging(SELECT);
   }
-  
+  */
   if(data & iTRIANGLE) {//triangle button
   Serial.println(data);
         bitbanging(TRIANGLE);
@@ -250,7 +209,6 @@ void loop()
    Serial.println(data);
     bitbanging(R2);
   }
-  
+          
   delay(5);
->>>>>>> 37bd3464c6d14fb5bf41e73fb131b511be1ad810
 }
