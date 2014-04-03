@@ -23,6 +23,7 @@
 #define LWHEEL_R	P3_5
 #define CRANE_R		P3_3
 #define	CRANE_B		P3_2
+#define MAGNET		P1_2
 #define UNDER_PIN_RED	P0_4
 #define UNDER_PIN_GREEN	P0_5
 #define UNDER_PIN_BLUE	P0_3
@@ -53,12 +54,13 @@
 #define MOVE_BR			7
 #define MOVE_BL			8
 #define MANUAL_DRIVE	15
-#define RETRACE			11
+#define MAGNETIZE		11
 #define UNDER_GLOW		13
+
 //Increment for amplitude80
-#define STEP 			30
-#define MAX_AMPLITUDE	1900
-#define MIN_AMPLITUDE	30
+#define STEP 			40
+#define MAX_AMPLITUDE	600
+#define MIN_AMPLITUDE	140
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
 #define SEC_ROT			1.00
@@ -77,7 +79,6 @@ volatile unsigned char crane = 0;
 volatile unsigned char under_glow_status = 0;
 //int idealAmp= 70; //moved into TXRX.h so TXRX.c can see it
 int command = 0;
-int sensativity = 0;
 int park_status = 0;
 volatile unsigned long timer = 0;
 volatile unsigned int timercount = 0;
@@ -155,12 +156,12 @@ void pwmcounter (void) interrupt 1
 	}
 	
 	if(crane){
-		if(cDirection==UP){
+		if(cDirection==CRANE_UP){
 			CRANE_R=(pwmC>pwmcount)?0:1;
 			CRANE_B=1;
 		}
 	
-		else if(cDirection==DOWN){
+		else if(cDirection==CRANE_DOWN){
 			CRANE_B=(pwmC>pwmcount)?0:1;
 			CRANE_R=1;
 		}
@@ -173,10 +174,10 @@ void pwmcounter (void) interrupt 1
 
 void moveCrane(char direction){
 	cDirection = direction;
-	pwmC = 50;
+	pwmC = 100;
 	crane = 1;
 	timer = 0;
-	while(timer < 5){} // NEEDS CALIBRATION!!
+	while(timer < 10){} // NEEDS CALIBRATION!!
 	crane = 0;
 	
 }
@@ -306,14 +307,16 @@ void test(void){
 	moveDistance(5.0, FORWARD);
 	}
 }
-void doManualDrive(){
-	int rAmp = 0;
-	int lAmp = 0;
+void doManualDrive(){ // Returns value of ADC
+	int rAmp ;
+	int lAmp ;
 	int command = NONE;
 	printf("---Entering Manual Drive---");
+	doUnderglow();
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);	
+		lAmp = GetADC(SENSE_LEFT);
+	
 		if(rAmp == 0 && lAmp ==0){
 			if(TEST) scanf("%d",&command);
 			else{
@@ -423,6 +426,10 @@ void doManualDrive(){
 					break;
 				case UNDER_GLOW:
 					doUnderGlow();
+					break;
+				case MAGNETIZE:
+					P1_2 ^= 1;
+					break;
 				default:
 					printf("DEFAULT\n");
 					rWheel = 0;
@@ -438,6 +445,7 @@ void doManualDrive(){
 			crane =0;	
 			P3 = 0xFF;
 		}
+		
 	}
 }
 void main(void){
@@ -446,16 +454,18 @@ void main(void){
 	int lAmp = 0;
 	int tempR, tempL;
 	int command = NONE;
+	int sensitivity = 0;
 	UNDER_PIN_RED = 1;
 	UNDER_PIN_GREEN = 1;
 	UNDER_PIN_BLUE = 1;
 	//doPark();
 	while(1){
 		if(TEST) doManualDrive();
-		rAmp = GetADC(SENSE_RIGHT);
-		lAmp = GetADC(SENSE_LEFT);
-		printf("idealAmp%d,ramp %d, lamp %d\n", idealAmp, rAmp, lAmp);
-		if(lAmp < idealAmp/40 && rAmp < idealAmp/40){
+		sensitivity = 15;
+		rAmp = GetADC(SENSE_RIGHT); //+ GetADC(SENSE_RIGHT_SUPP);
+		lAmp = GetADC(SENSE_LEFT); //+ GetADC(SENSE_LEFT_SUPP);
+		//printf("idealAmp%d\n", idealAmp);
+		if(lAmp <= idealAmp/50 && rAmp <= idealAmp/50){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
@@ -468,6 +478,7 @@ void main(void){
 					 printf("too close\n");
 					 idealAmp= MAX_AMPLITUDE;
 					 }
+					 printf("idealAmp%d\n", idealAmp);
 					break;
 				case MOVE_BACK:
 					idealAmp-= STEP;
@@ -475,9 +486,13 @@ void main(void){
 					 printf("too far");
 					 idealAmp= MIN_AMPLITUDE;
 					 }
+					 printf("idealAmp%d\n", idealAmp);
 					break;
 				case MANUAL_DRIVE:
 					doManualDrive();
+					wait(500);
+					idealAmp = GetADC(SENSE_LEFT);
+					printf("idealAmp%d\n", idealAmp);
 					break;
 				case 255: //ERROR
 					//printf("error 255\n");
@@ -491,35 +506,38 @@ void main(void){
 			command = NONE;
 			
 		}
-		
-		else if (lAmp > MIN_AMPLITUDE && rAmp > MIN_AMPLITUDE){
-			//printf("R:%d L:%d\n", rAmp, lAmp);
-			if(rAmp < idealAmp+ sensativity){
-				rDirection = FORWARD;
-				tempR = 1;	
-			}
-			else if(rAmp > idealAmp- sensativity){
-				rDirection = BACK;
-				tempR = 1;	
-			}
-			else tempR = 0;
-			
-			if(lAmp < idealAmp+ sensativity){
-				lDirection = FORWARD;
-				tempL = 1;	
-			}
-			else if(lAmp > idealAmp- sensativity){
-				lDirection = BACK;
-				tempL = 1;	
-			}
-			else tempL = 0;
-			//tempPWM = abs(((lAmp+rAmp)/2)-idealAmp)*(100/idealAmp);
-			//tempPWM = (tempPWM > 70 ? tempPWM : 70);
-			pwmR = 50;
-			pwmL = 50;
-			rWheel = tempR;
-			lWheel = tempL;
-		}	
+		else if ( abs( (lAmp+rAmp)/2.0 - idealAmp ) >sensitivity|| abs (lAmp - rAmp)> sensitivity){
+				//printf("R:%d L:%d\n", rAmp, lAmp);
+				if(rAmp < idealAmp){
+					rDirection = FORWARD;
+					tempR = 1;	
+				}
+				else if(rAmp > idealAmp){
+					rDirection = BACK;
+					tempR = 1;	
+				}
+				else tempR = 0;
+				
+				if(lAmp < idealAmp){
+					lDirection = FORWARD;
+					tempL = 1;	
+				}
+				else if(lAmp > idealAmp){
+					lDirection = BACK;
+					tempL = 1;	
+				}
+				else tempL = 0;
+				//tempPWM = abs(((lAmp+rAmp)/2)-idealAmp)*(100/idealAmp);
+				//tempPWM = (tempPWM > 70 ? tempPWM : 70);
+				pwmR = 50;
+				pwmL = 50;
+				rWheel = tempR;
+				lWheel = tempL;	
+		}
+		else{
+			lWheel = 0;
+			rWheel = 0;
+		}
 	}
 	Exit:
 	EA = 0;

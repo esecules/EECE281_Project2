@@ -155,7 +155,7 @@ unsigned char rData(void){
 
 	rxdata[0]=rByte1();
 	if(rxdata[0]!=STARTBYTE){
-		printf("NOT STARTBYTE (0x%x)\n",rxdata[0]);
+		//printf("NOT STARTBYTE (0x%x)\n",rxdata[0]);
 		return STARTBYTE;
 	}
 	
@@ -164,7 +164,7 @@ unsigned char rData(void){
 	if(rxdata[1]==crc_table[rxdata[0]]){
 		return rxdata[0];
 	}else{
-		printf("DATA: %x, CHECKSUM WRONG %x SHOULD BE %x\n", rxdata[0], rxdata[1], crc_table[rxdata[0]]);
+		//printf("DATA: %x, CHECKSUM WRONG %x SHOULD BE %x\n", rxdata[0], rxdata[1], crc_table[rxdata[0]]);
 		return STARTBYTE;
 	}
 }
