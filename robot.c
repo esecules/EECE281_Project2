@@ -63,7 +63,7 @@
 #define MIN_AMPLITUDE	140
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
-#define SEC_ROT			1.00
+#define SEC_ROT			4.00
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -312,7 +312,8 @@ void doManualDrive(){ // Returns value of ADC
 	int lAmp ;
 	int command = NONE;
 	printf("---Entering Manual Drive---");
-	doUnderglow();
+	under_glow_status = 0;
+	doUnderGlow();
 	while(1){
 		rAmp = GetADC(SENSE_RIGHT);
 		lAmp = GetADC(SENSE_LEFT);
@@ -342,6 +343,8 @@ void doManualDrive(){ // Returns value of ADC
 					moveCrane(CRANE_DOWN);
 					break;
 				case MANUAL_DRIVE:
+					under_glow_status = 9;
+					doUnderGlow();
 					printf("---Exiting Manual Drive---");
 					return;
 				case MOVE_RIGHT:
@@ -437,15 +440,7 @@ void doManualDrive(){ // Returns value of ADC
 					crane =0;
 					break;
 			}
-		}
-		else if(0){
-			command = NONE;
-			rWheel = 0;
-			lWheel = 0;
-			crane =0;	
-			P3 = 0xFF;
-		}
-		
+		}	
 	}
 }
 void main(void){
@@ -461,11 +456,11 @@ void main(void){
 	//doPark();
 	while(1){
 		if(TEST) doManualDrive();
-		sensitivity = 15;
+		sensitivity = 17;
 		rAmp = GetADC(SENSE_RIGHT); //+ GetADC(SENSE_RIGHT_SUPP);
 		lAmp = GetADC(SENSE_LEFT); //+ GetADC(SENSE_LEFT_SUPP);
 		//printf("idealAmp%d\n", idealAmp);
-		if(lAmp <= idealAmp/50 && rAmp <= idealAmp/50){
+		if(lAmp < THRXTHRESH && rAmp < TXRXTHRESH){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
@@ -539,6 +534,4 @@ void main(void){
 			rWheel = 0;
 		}
 	}
-	Exit:
-	EA = 0;
 }
