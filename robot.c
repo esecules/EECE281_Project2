@@ -64,7 +64,7 @@
 #define MIN_AMPLITUDE	140
 //Car Dimensions (in centimeters)
 #define WHEEL_CIRCUMFERENCE	21.0
-#define SEC_ROT			4.00
+#define SEC_ROT			1.258
 //These variables are used in the ISR
 volatile unsigned char pwmcount;
 volatile unsigned char pwmL=0;
@@ -312,6 +312,8 @@ void doManualDrive(){ // Returns value of ADC
 	int rAmp ;
 	int lAmp ;
 	int command = NONE;
+	MAGNET = 1;
+	MAGNET_INDICATOR = 1;
 	printf("---Entering Manual Drive---");
 	under_glow_status = 0;
 	doUnderGlow();
@@ -432,6 +434,8 @@ void doManualDrive(){ // Returns value of ADC
 					doUnderGlow();
 					break;
 				case MAGNETIZE:
+					under_glow_status = 9;
+					doUnderGlow();
 					MAGNET ^= 1;
 					MAGNET_INDICATOR ^= 1;
 					
@@ -463,7 +467,7 @@ void main(void){
 		rAmp = GetADC(SENSE_RIGHT); //+ GetADC(SENSE_RIGHT_SUPP);
 		lAmp = GetADC(SENSE_LEFT); //+ GetADC(SENSE_LEFT_SUPP);
 		//printf("idealAmp%d\n", idealAmp);
-		if(lAmp < THRXTHRESH && rAmp < TXRXTHRESH){
+		if(lAmp < TXRXTHRESH && rAmp < TXRXTHRESH){
 			ET0 = 0;
 			P3 = 0xFF;
 			command = rData();
