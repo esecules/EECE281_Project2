@@ -232,14 +232,14 @@ void doPark(void){
 	if ( park_status == 0 )
 	{
 		rotate(C_CLOCK,45);
-		moveDistance(23.0,BACK);
+		moveDistance(45.0,BACK);
 		rotate(CLOCK,40);
 		park_status = 1;
 	}
 	else
 	{
 		rotate(C_CLOCK,40);
-		moveDistance(23.0,FORWARD);
+		moveDistance(45.0,FORWARD);
 		rotate(CLOCK,45);
 		park_status = 0;
 	}
