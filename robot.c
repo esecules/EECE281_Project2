@@ -27,6 +27,7 @@
 #define UNDER_PIN_RED	P0_4
 #define UNDER_PIN_GREEN	P0_5
 #define UNDER_PIN_BLUE	P0_3
+#define MAGNET_INDICATOR P0_2
 #define SENSE_LEFT 	0
 #define SENSE_LEFT_SUPP 2
 #define SENSE_RIGHT_SUPP 3
@@ -431,7 +432,9 @@ void doManualDrive(){ // Returns value of ADC
 					doUnderGlow();
 					break;
 				case MAGNETIZE:
-					P1_2 ^= 1;
+					MAGNET ^= 1;
+					MAGNET_INDICATOR ^= 1;
+					
 					break;
 				default:
 					printf("DEFAULT\n");
